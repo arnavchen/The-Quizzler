@@ -12,6 +12,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
+import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,11 +32,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TheQuizzlerTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                Scaffold { innerPadding ->
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxHeight()
+                        .padding(innerPadding)) {
+                        AppName()
+                        NameField()
+                        PlayButton()
+                    }
                 }
             }
         }
@@ -31,17 +46,48 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
+fun NameField(modifier: Modifier = Modifier) {
+    var name = remember {
+        mutableStateOf("")
+    }
+    OutlinedTextField(
+        value = name.value,
+        onValueChange = { text->
+            name.value = text
+        },
         modifier = modifier
     )
+}
+
+@Composable
+fun AppName(){
+    Text(
+        text="The Quizzler",
+        fontSize = 24.sp,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+    )
+}
+
+@Composable
+fun PlayButton(){
+    Button(onClick = {}) {
+        Text("Play")
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     TheQuizzlerTheme {
-        Greeting("Android")
+        Scaffold { innerPadding ->
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxHeight()
+                .padding(innerPadding)) {
+                AppName()
+                NameField()
+                PlayButton()
+            }
+        }
     }
 }

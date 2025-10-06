@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -73,35 +75,66 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun NameField(modifier: Modifier = Modifier) {
-    var name = remember {
-        mutableStateOf("")
+    var name = remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        Log.d("Lifecycle", "NameField Composable CREATED")
     }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            Log.d("Lifecycle", "NameField Composable DISPOSED")
+        }
+    }
+
     OutlinedTextField(
         value = name.value,
-        onValueChange = { text->
+        onValueChange = { text ->
             name.value = text
         },
         modifier = modifier
     )
 }
 
+
 @Composable
-fun AppName(){
+fun AppName() {
+    LaunchedEffect(Unit) {
+        Log.d("Lifecycle", "AppName Composable CREATED")
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            Log.d("Lifecycle", "AppName Composable DISPOSED")
+        }
+    }
+
     Text(
-        text="The Quizzler",
+        text = "The Quizzler",
         fontSize = 24.sp,
         textAlign = TextAlign.Center,
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     )
 }
 
+
 @Composable
-fun PlayButton(){
+fun PlayButton() {
+    LaunchedEffect(Unit) {
+        Log.d("Lifecycle", "PlayButton Composable CREATED")
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            Log.d("Lifecycle", "PlayButton Composable DISPOSED")
+        }
+    }
+
     Button(onClick = {}) {
         Text("Play")
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

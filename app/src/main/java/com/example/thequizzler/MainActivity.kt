@@ -23,6 +23,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
@@ -75,7 +76,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun NameField(modifier: Modifier = Modifier) {
-    var name = remember { mutableStateOf("") }
+    var name = rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "NameField Composable CREATED")

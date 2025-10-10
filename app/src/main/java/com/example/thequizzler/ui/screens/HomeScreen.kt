@@ -106,9 +106,6 @@ fun HorizontalHomeScreen() {
             NameField()
             PlayButton()
         }
-
-        // Optional: add a decorative or preview image
-        // Image(painter = painterResource(R.drawable.quizzler_logo), contentDescription = null)
     }
 }
 

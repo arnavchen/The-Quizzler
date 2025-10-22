@@ -1,25 +1,27 @@
 package com.example.thequizzler.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.thequizzler.ui.theme.TheQuizzlerTheme
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 
 data class PlayerScore(
     val name: String,
@@ -42,27 +44,30 @@ fun LeaderboardScreen(navController: NavController) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
 
-    if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
-        HorizontalLeaderboardScreen()
-    } else {
-        VerticalLeaderboardScreen()
+    // Soft gradient background to match SessionsScreen
+    val gradient = Brush.verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+            MaterialTheme.colorScheme.surface
+        )
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradient)
+            .padding(horizontal = 16.dp, vertical = 24.dp)
+    ) {
+        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+            HorizontalLeaderboardScreen()
+        } else {
+            VerticalLeaderboardScreen()
+        }
     }
 }
 
 @Composable
 fun VerticalLeaderboardScreen() {
-    LaunchedEffect(Unit) {
-        Log.d("Lifecycle", "VerticalLeaderboardScreen Composable CREATED")
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            Log.d("Lifecycle", "VerticalLeaderboardScreen Composable DISPOSED")
-        }
-    }
-
-    //val leaderboard by leaderboardViewModel.leaderboard.collectAsState()
-    // Temporary placeholder data until database integration
     val leaderboard = listOf(
         PlayerScore("Arnav", 960, 1),
         PlayerScore("Connor", 952, 2),
@@ -74,62 +79,27 @@ fun VerticalLeaderboardScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "Leaderboard",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            ),
+            modifier = Modifier.padding(bottom = 20.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Header Row
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(1.dp, Color.Gray)
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Name", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            Text("Score", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            Text("Place", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-        }
-
-        // Leaderboard items
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            itemsIndexed(leaderboard) { _, player ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(0.5.dp, Color.LightGray)
-                        .padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(player.name, modifier = Modifier.weight(1f))
-                    Text(player.score.toString(), modifier = Modifier.weight(1f))
-                    Text(player.place.toString(), modifier = Modifier.weight(1f))
-                }
-            }
+        leaderboard.forEach { player ->
+            LeaderboardCard(player)
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
 fun HorizontalLeaderboardScreen() {
-    LaunchedEffect(Unit) {
-        Log.d("Lifecycle", "HorizontalLeaderboardScreen Composable CREATED")
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            Log.d("Lifecycle", "HorizontalLeaderboardScreen Composable DISPOSED")
-        }
-    }
-
     val leaderboard = listOf(
         PlayerScore("Arnav", 960, 1),
         PlayerScore("Connor", 952, 2),
@@ -141,34 +111,74 @@ fun HorizontalLeaderboardScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(vertical = 16.dp)
+            .horizontalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "Leaderboard",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            ),
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Horizontal table
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(horizontal = 12.dp)
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Place", fontWeight = FontWeight.Bold)
-                leaderboard.forEach { Text(it.place.toString()) }
+            leaderboard.forEach { player ->
+                LeaderboardCard(player, Modifier.width(220.dp))
             }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Score", fontWeight = FontWeight.Bold)
-                leaderboard.forEach { Text(it.score.toString()) }
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Name", fontWeight = FontWeight.Bold)
-                leaderboard.forEach { Text(it.name) }
-            }
+        }
+    }
+}
+
+@Composable
+fun LeaderboardCard(player: PlayerScore, modifier: Modifier = Modifier) {
+    val borderColor = when (player.place) {
+        1 -> Color(0xFFFFD700)
+        2 -> Color(0xFFC0C0C0)
+        3 -> Color(0xFFCD7F32)
+        else -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
+    }
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .border(2.dp, borderColor, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(20.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "${player.place} ${if (player.place == 1) "🏆" else ""}",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = borderColor
+            )
+
+            Text(
+                text = player.name,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Text(
+                text = "${player.score} pts",
+                fontSize = 26.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

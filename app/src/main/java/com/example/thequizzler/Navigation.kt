@@ -30,5 +30,13 @@ fun Navigation(navController: NavHostController, modifier: Modifier = Modifier) 
         composable(Screen.Settings.route) { SettingsScreen(navController) }
         composable(Screen.Leaderboard.route) { LeaderboardScreen(navController) }
         composable(Screen.Sessions.route) { SessionsScreen(navController) }
+        composable(Screen.MockQuiz.route) { backStackEntry ->
+            val playerName = backStackEntry.arguments?.getString("playerName")
+            MockQuizScreen(navController = navController, playerName = playerName)
+        }
+        composable(Screen.SessionInfo.route) { backStackEntry ->
+            val sessionId = backStackEntry.arguments?.getString("sessionId")
+            SessionInfoScreen(navController = navController, sessionId = sessionId)
+        }
     }
 }

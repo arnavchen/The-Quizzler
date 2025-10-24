@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.MutableState
+import java.net.URLEncoder
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,15 +46,18 @@ fun HomeScreen(navController: NavController) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
 
+    // lift name state here so PlayButton can read it and navigate
+    val name = rememberSaveable { mutableStateOf("") }
+
     if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
-        HorizontalHomeScreen()
+        HorizontalHomeScreen(navController = navController, name = name)
     } else {
-        VerticalHomeScreen()
+        VerticalHomeScreen(navController = navController, name = name)
     }
 }
 
 @Composable
-fun VerticalHomeScreen() {
+fun VerticalHomeScreen(navController: NavController, name: MutableState<String>) {
 
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "VerticalHomeScreen Composable CREATED")
@@ -73,13 +78,13 @@ fun VerticalHomeScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         QuizzlerTitle()
-        NameField()
-        PlayButton()
+        NameField(name)
+        PlayButton(navController = navController, name = name)
     }
 }
 
 @Composable
-fun HorizontalHomeScreen() {
+fun HorizontalHomeScreen(navController: NavController, name: MutableState<String>) {
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "HorizontalHomeScreen Composable CREATED")
     }
@@ -103,15 +108,14 @@ fun HorizontalHomeScreen() {
             verticalArrangement = Arrangement.Center
         ) {
             QuizzlerTitle()
-            NameField()
-            PlayButton()
+            NameField(name)
+            PlayButton(navController = navController, name = name)
         }
     }
 }
 
 @Composable
-fun NameField(modifier: Modifier = Modifier) {
-    val name = rememberSaveable { mutableStateOf("") }
+fun NameField(name: MutableState<String>, modifier: Modifier = Modifier) {
 
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "NameField Composable CREATED")
@@ -125,9 +129,7 @@ fun NameField(modifier: Modifier = Modifier) {
 
     OutlinedTextField(
         value = name.value,
-        onValueChange = { text ->
-            name.value = text
-        },
+        onValueChange = { text -> name.value = text },
         modifier = modifier
     )
 }
@@ -155,7 +157,7 @@ fun QuizzlerTitle() {
 
 
 @Composable
-fun PlayButton() {
+fun PlayButton(navController: NavController, name: MutableState<String>) {
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "PlayButton Composable CREATED")
     }
@@ -166,7 +168,11 @@ fun PlayButton() {
         }
     }
 
-    Button(onClick = {}) {
+    Button(onClick = {
+        // navigate to MockQuizScreen with encoded player name
+        val player = URLEncoder.encode(name.value.ifEmpty { "Player" }, "UTF-8")
+        navController.navigate("mock_quiz/$player")
+    }) {
         Text("Play")
     }
 }

@@ -40,7 +40,7 @@ data class SessionInfo(
 )
 
 @Composable
-fun SessionInfoScreen(navController: NavController) {
+fun SessionInfoScreen(navController: NavController, sessionId: String? = null) {
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "SessionInfoScreen Composable CREATED")
     }
@@ -54,7 +54,7 @@ fun SessionInfoScreen(navController: NavController) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
 
-    // Temporary placeholder session
+    // Temporary placeholder session (in a real app we'd load by sessionId)
     val session = SessionInfo(
         playerName = "Arnav",
         dateTime = "9/25/2025, 9:01 PM",
@@ -99,6 +99,9 @@ fun VerticalSessionInfo(session: SessionInfo, navController: NavController) {
                 Column(modifier = Modifier.padding(start = 8.dp)) {
                     Text(session.playerName, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                     Text(session.dateTime, fontSize = 14.sp, color = Color.Gray)
+                    if (sessionId != null) {
+                        Text("Session ID: $sessionId", fontSize = 12.sp, color = Color.Gray)
+                    }
                 }
             }
 

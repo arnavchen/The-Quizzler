@@ -25,7 +25,7 @@ import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 
 // Temporary data class for placeholder sessions
 data class Session(
-    val id: Int, // 👈 unique identifier for navigation
+    val id: Int,
     val playerName: String,
     val score: Int,
     val correct: Int,

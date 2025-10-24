@@ -149,7 +149,6 @@ fun SessionCard(session: Session, navController: NavController, modifier: Modifi
         modifier = modifier
             .fillMaxWidth()
             .clickable {
-                // 👇 Navigate to the session info screen
                 navController.navigate("sessionInfo/${session.id}")
             },
         shape = RoundedCornerShape(16.dp),

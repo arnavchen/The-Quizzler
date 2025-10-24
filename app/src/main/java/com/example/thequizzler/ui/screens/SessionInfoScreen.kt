@@ -25,7 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 
-// Placeholder data classes — easy to connect to database later
+// Placeholder data classes
 data class QuestionInfo(
     val questionText: String,
     val userAnswer: String,
@@ -99,9 +99,6 @@ fun VerticalSessionInfo(session: SessionInfo, navController: NavController) {
                 Column(modifier = Modifier.padding(start = 8.dp)) {
                     Text(session.playerName, fontWeight = FontWeight.Bold, fontSize = 22.sp)
                     Text(session.dateTime, fontSize = 14.sp, color = Color.Gray)
-                    if (sessionId != null) {
-                        Text("Session ID: $sessionId", fontSize = 12.sp, color = Color.Gray)
-                    }
                 }
             }
 

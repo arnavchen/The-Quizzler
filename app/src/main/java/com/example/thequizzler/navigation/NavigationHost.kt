@@ -16,7 +16,7 @@ import com.example.thequizzler.ui.screens.*
 
 
 @Composable
-fun Navigation(navController: NavHostController, modifier: Modifier = Modifier) {
+fun NavHost(navController: NavHostController, modifier: Modifier = Modifier) {
 
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "Navigation Composable CREATED")

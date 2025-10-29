@@ -169,7 +169,6 @@ fun PlayButton() {
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
@@ -177,5 +176,3 @@ fun HomeScreenPreview() {
         HomeScreen(navController = rememberNavController())
     }
 }
-
-

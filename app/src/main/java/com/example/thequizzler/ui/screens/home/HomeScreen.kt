@@ -1,4 +1,4 @@
-package com.example.thequizzler.ui.screens
+package com.example.thequizzler.ui.screens.home
 
 import android.icu.lang.UCharacter
 import android.util.Log

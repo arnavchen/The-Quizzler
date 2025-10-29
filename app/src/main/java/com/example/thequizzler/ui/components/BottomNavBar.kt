@@ -1,4 +1,4 @@
-package com.example.thequizzler.navigation
+package com.example.thequizzler.ui.components
 
 import android.util.Log
 import androidx.compose.material3.*
@@ -7,6 +7,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.thequizzler.navigation.Screen
 
 @Composable
 fun BottomNavBar(navController: NavHostController) {

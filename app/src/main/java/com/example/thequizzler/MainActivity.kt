@@ -9,10 +9,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 import android.util.Log
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.thequizzler.navigation.BottomNavBar
+import com.example.thequizzler.ui.components.BottomNavBar
 import com.example.thequizzler.navigation.NavigationHost
 import com.example.thequizzler.navigation.Screen
 
@@ -46,7 +47,7 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     NavigationHost(
                         navController = navController,
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.fillMaxSize().padding(innerPadding)
                     );
                 }
             }

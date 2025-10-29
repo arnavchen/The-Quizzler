@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.thequizzler.ui.screens.home.HomeScreen
 import com.example.thequizzler.ui.screens.sessioninfo.SessionInfoScreen
 import com.example.thequizzler.ui.screens.leaderboard.LeaderboardScreen
 import com.example.thequizzler.ui.screens.sessions.SessionsScreen
@@ -16,7 +17,7 @@ import com.example.thequizzler.ui.screens.*
 
 
 @Composable
-fun NavHost(navController: NavHostController, modifier: Modifier = Modifier) {
+fun NavigationHost(navController: NavHostController, modifier: Modifier = Modifier) {
 
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "Navigation Composable CREATED")

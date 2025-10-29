@@ -1,15 +1,14 @@
 package com.example.thequizzler.ui.screens
 
-import android.icu.lang.UCharacter
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -25,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.thequizzler.Navigation
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 
 @Composable
@@ -90,7 +88,7 @@ fun HorizontalHomeScreen() {
         }
     }
 
-    androidx.compose.foundation.layout.Row(
+    Row(
         modifier = Modifier
             .fillMaxHeight()
             .fillMaxWidth()

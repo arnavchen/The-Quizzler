@@ -13,6 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.thequizzler.navigation.BottomNavBar
+import com.example.thequizzler.navigation.NavigationHost
+import com.example.thequizzler.navigation.Screen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +44,10 @@ class MainActivity : ComponentActivity() {
 
                     }
                 ) { innerPadding ->
-                    Navigation(navController = navController, modifier = Modifier.padding(innerPadding));
+                    NavigationHost(
+                        navController = navController,
+                        modifier = Modifier.padding(innerPadding)
+                    );
                 }
             }
         }

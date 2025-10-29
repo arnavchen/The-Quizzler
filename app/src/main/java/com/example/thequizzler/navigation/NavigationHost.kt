@@ -1,4 +1,4 @@
-package com.example.thequizzler
+package com.example.thequizzler.navigation
 
 import android.util.Log
 import androidx.compose.runtime.Composable;
@@ -6,14 +6,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import com.example.thequizzler.Screen;
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.thequizzler.ui.screens.*
 
 @Composable
-fun Navigation(navController: NavHostController, modifier: Modifier = Modifier) {
+fun NavigationHost(navController: NavHostController, modifier: Modifier = Modifier) {
 
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "Navigation Composable CREATED")

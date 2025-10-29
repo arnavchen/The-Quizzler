@@ -1,5 +1,6 @@
-package com.example.thequizzler.ui.screens
+package com.example.thequizzler.ui.screens.sessions
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -62,7 +63,7 @@ fun SessionsScreen(navController: NavController) {
             .background(gradient)
             .padding(horizontal = 16.dp, vertical = 24.dp)
     ) {
-        if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             HorizontalSessionsScreen(navController)
         } else {
             VerticalSessionsScreen(navController)

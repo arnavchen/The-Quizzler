@@ -8,7 +8,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.thequizzler.ui.screens.*
+import com.example.thequizzler.ui.screens.home.HomeScreen
+import com.example.thequizzler.ui.screens.leaderboard.LeaderboardScreen
+import com.example.thequizzler.ui.screens.sessions.SessionsScreen
+import com.example.thequizzler.ui.screens.settings.SettingsScreen
 
 @Composable
 fun NavigationHost(navController: NavHostController, modifier: Modifier = Modifier) {

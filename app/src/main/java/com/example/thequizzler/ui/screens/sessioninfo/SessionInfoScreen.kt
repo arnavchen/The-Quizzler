@@ -1,7 +1,7 @@
-package com.example.thequizzler.ui.screens
+package com.example.thequizzler.ui.screens.sessioninfo
 
+import android.content.res.Configuration
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -66,7 +66,7 @@ fun SessionInfoScreen(navController: NavController) {
         )
     )
 
-    if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
         HorizontalSessionInfo(session, navController)
     } else {
         VerticalSessionInfo(session, navController)

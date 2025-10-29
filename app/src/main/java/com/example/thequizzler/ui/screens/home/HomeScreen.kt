@@ -1,5 +1,6 @@
-package com.example.thequizzler.ui.screens
+package com.example.thequizzler.ui.screens.home
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -42,7 +43,7 @@ fun HomeScreen(navController: NavController) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
 
-    if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
         HorizontalHomeScreen()
     } else {
         VerticalHomeScreen()

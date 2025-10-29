@@ -1,5 +1,6 @@
-package com.example.thequizzler.ui.screens
+package com.example.thequizzler.ui.screens.settings
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -32,7 +33,7 @@ fun SettingsScreen(navController: NavController) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
 
-    if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
         HorizontalSettingsScreen()
     } else {
         VerticalSettingsScreen()

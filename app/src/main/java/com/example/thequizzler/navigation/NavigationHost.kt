@@ -1,7 +1,7 @@
 package com.example.thequizzler.navigation
 
 import android.util.Log
-import androidx.compose.runtime.Composable;
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -13,7 +13,8 @@ import com.example.thequizzler.ui.screens.sessioninfo.SessionInfoScreen
 import com.example.thequizzler.ui.screens.leaderboard.LeaderboardScreen
 import com.example.thequizzler.ui.screens.sessions.SessionsScreen
 import com.example.thequizzler.ui.screens.settings.SettingsScreen
-import com.example.thequizzler.ui.screens.*
+import com.example.thequizzler.ui.screens.ResultsScreen
+import com.example.thequizzler.ui.screens.MockQuizScreen
 
 
 @Composable

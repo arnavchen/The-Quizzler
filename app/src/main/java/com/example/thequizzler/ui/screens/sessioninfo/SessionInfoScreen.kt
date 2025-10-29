@@ -25,7 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 
-// Placeholder data classes — easy to connect to database later
+// Placeholder data classes
 data class QuestionInfo(
     val questionText: String,
     val userAnswer: String,
@@ -40,7 +40,7 @@ data class SessionInfo(
 )
 
 @Composable
-fun SessionInfoScreen(navController: NavController) {
+fun SessionInfoScreen(navController: NavController, sessionId: String? = null) {
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "SessionInfoScreen Composable CREATED")
     }
@@ -54,7 +54,7 @@ fun SessionInfoScreen(navController: NavController) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
 
-    // Temporary placeholder session
+    // Temporary placeholder session (in a real app we'd load by sessionId)
     val session = SessionInfo(
         playerName = "Arnav",
         dateTime = "9/25/2025, 9:01 PM",

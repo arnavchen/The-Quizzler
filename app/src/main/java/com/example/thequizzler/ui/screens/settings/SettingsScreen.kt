@@ -137,9 +137,11 @@ fun HorizontalSettingsScreen(settingsUiModel: SettingsUiModel) {
 @Composable
 fun SettingsOptions(settingsUiModel: SettingsUiModel) {
     // Collect flows from the ViewModel (or preview model) into Compose state
-    val locationEnabled by settingsUiModel.isLocationEnabled.collectAsState(initial = settingsUiModel.isLocationEnabled.value)
-    val offlineMode by settingsUiModel.isOfflineMode.collectAsState(initial = settingsUiModel.isOfflineMode.value)
-    val measurementSystem by settingsUiModel.measurementSystem.collectAsState(initial = settingsUiModel.measurementSystem.value)
+    // Avoid directly reading StateFlow.value inside composition (lint). Use
+    // safe initial defaults that match the ViewModel's stateIn defaults.
+    val locationEnabled by settingsUiModel.isLocationEnabled.collectAsState(initial = false)
+    val offlineMode by settingsUiModel.isOfflineMode.collectAsState(initial = true)
+    val measurementSystem by settingsUiModel.measurementSystem.collectAsState(initial = "Met")
 
     SettingToggleRow(
         title = "Location Questions",

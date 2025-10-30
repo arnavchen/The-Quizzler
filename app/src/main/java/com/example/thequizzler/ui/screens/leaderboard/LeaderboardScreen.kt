@@ -211,6 +211,9 @@ fun LeaderboardCard(player: PlayerScore, modifier: Modifier = Modifier) {
 @Composable
 fun LeaderboardScreenPreview() {
     TheQuizzlerTheme {
-        LeaderboardScreen(navController = rememberNavController())
+        LeaderboardScreen(
+            navController = rememberNavController(),
+            uiModel = PreviewLeaderboardUiModel()
+        )
     }
 }

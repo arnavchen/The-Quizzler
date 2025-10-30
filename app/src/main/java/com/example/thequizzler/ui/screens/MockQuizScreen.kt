@@ -6,6 +6,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
+import kotlin.math.roundToInt
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -46,9 +48,27 @@ fun MockQuizScreen(navController: NavController, playerName: String?) {
         "What planet do we live on?"
     )
 
-    // state for question index and score
     var questionIndex by remember { mutableStateOf(0) }
     var score by remember { mutableStateOf(0) }
+
+    val totalTimeSeconds = 15.0 // default total seconds per question
+    val totalTimeMs = (totalTimeSeconds * 1000).toLong()
+
+    var timeLeftMs by remember { mutableStateOf(totalTimeMs) }
+
+    // Start a countdown whenever the questionIndex changes.
+    LaunchedEffect(questionIndex) {
+        val startTime = System.currentTimeMillis()
+        // reset timeLeft
+        timeLeftMs = totalTimeMs
+        while (true) {
+            val elapsed = System.currentTimeMillis() - startTime
+            val remaining = totalTimeMs - elapsed
+            timeLeftMs = if (remaining > 0) remaining else 0L
+            if (timeLeftMs <= 0L) break
+            delay(50L)
+        }
+    }
 
     if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
         HorizontalMockQuizScreen(
@@ -57,7 +77,9 @@ fun MockQuizScreen(navController: NavController, playerName: String?) {
             questionIndex = questionIndex,
             score = score,
             onAnswer = {
-                score += 10
+                val fraction = (timeLeftMs.toDouble() / totalTimeMs.toDouble()).coerceIn(0.0, 1.0)
+                val increment = (100.0 * fraction).roundToInt()
+                score += increment
                 if (questionIndex < questions.lastIndex) {
                     questionIndex++
                 } else {
@@ -73,7 +95,9 @@ fun MockQuizScreen(navController: NavController, playerName: String?) {
             questionIndex = questionIndex,
             score = score,
             onAnswer = {
-                score += 10
+                val fraction = (timeLeftMs.toDouble() / totalTimeMs.toDouble()).coerceIn(0.0, 1.0)
+                val increment = (100.0 * fraction).roundToInt()
+                score += increment
                 if (questionIndex < questions.lastIndex) {
                     questionIndex++
                 } else {

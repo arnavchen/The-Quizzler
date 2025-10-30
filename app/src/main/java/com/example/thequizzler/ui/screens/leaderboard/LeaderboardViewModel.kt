@@ -16,8 +16,6 @@ interface LeaderboardUiModel {
  * ViewModel that exposes the top high score sessions from the repository.
  */
 class LeaderboardViewModel(repository: QuizRepository) : ViewModel(), LeaderboardUiModel {
-
-    // Expose the repository's highScores Flow as a StateFlow for the UI to collect.
     override val highScores: StateFlow<List<Session>> = repository.highScores
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 }

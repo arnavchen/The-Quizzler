@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -25,6 +26,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.thequizzler.QuizzlerApplication
+import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 
 data class PlayerScore(
     val name: String,
@@ -201,4 +203,34 @@ fun LeaderboardCard(player: PlayerScore, modifier: Modifier = Modifier) {
     }
 }
 
-// Preview removed to keep runtime wiring simple.
+@Preview(showBackground = true)
+@Composable
+fun VerticalLeaderboardScreenPreview() {
+    TheQuizzlerTheme {
+        VerticalLeaderboardScreen(
+            leaderboard = listOf(
+                PlayerScore("Arnav", 960, 1),
+                PlayerScore("Connor", 952, 2),
+                PlayerScore("Amav", 887, 3),
+                PlayerScore("Joel", 361, 4),
+                PlayerScore("Ian", 67, 5)
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 640, heightDp = 360)
+@Composable
+fun HorizontalLeaderboardScreenPreview() {
+    TheQuizzlerTheme {
+        HorizontalLeaderboardScreen(
+            leaderboard = listOf(
+                PlayerScore("Arnav", 960, 1),
+                PlayerScore("Connor", 952, 2),
+                PlayerScore("Amav", 887, 3),
+                PlayerScore("Joel", 361, 4),
+                PlayerScore("Ian", 67, 5)
+            )
+        )
+    }
+}

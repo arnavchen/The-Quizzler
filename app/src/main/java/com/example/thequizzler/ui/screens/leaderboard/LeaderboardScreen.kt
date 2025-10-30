@@ -18,16 +18,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.thequizzler.QuizzlerApplication
-import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 
 data class PlayerScore(
     val name: String,
@@ -36,7 +33,7 @@ data class PlayerScore(
 )
 
 @Composable
-fun LeaderboardScreen(navController: NavController, uiModel: LeaderboardUiModel? = null) {
+fun LeaderboardScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "LeaderboardScreen Composable CREATED")
     }
@@ -64,23 +61,20 @@ fun LeaderboardScreen(navController: NavController, uiModel: LeaderboardUiModel?
             .background(gradient)
             .padding(horizontal = 16.dp, vertical = 24.dp)
     ) {
-        val model: LeaderboardUiModel = uiModel ?: run {
-            val context = LocalContext.current.applicationContext as QuizzlerApplication
-            val repository = context.container.quizzlerRepository
+        val context = LocalContext.current.applicationContext as QuizzlerApplication
+        val repository = context.container.quizzlerRepository
 
-            val factory = object : ViewModelProvider.Factory {
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    if (modelClass.isAssignableFrom(LeaderboardViewModel::class.java)) {
-                        @Suppress("UNCHECKED_CAST")
-                        return LeaderboardViewModel(repository) as T
-                    }
-                    throw IllegalArgumentException("Unknown ViewModel class")
+        val factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(LeaderboardViewModel::class.java)) {
+                    @Suppress("UNCHECKED_CAST")
+                    return LeaderboardViewModel(repository) as T
                 }
+                throw IllegalArgumentException("Unknown ViewModel class")
             }
-
-            viewModel<LeaderboardViewModel>(factory = factory)
         }
 
+        val model: LeaderboardViewModel = viewModel(factory = factory)
         val sessions by model.highScores.collectAsState()
         val leaderboard = sessions.mapIndexed { index, s -> PlayerScore(s.userName, s.score, index + 1) }
 
@@ -207,13 +201,4 @@ fun LeaderboardCard(player: PlayerScore, modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LeaderboardScreenPreview() {
-    TheQuizzlerTheme {
-        LeaderboardScreen(
-            navController = rememberNavController(),
-            uiModel = PreviewLeaderboardUiModel()
-        )
-    }
-}
+// Preview removed to keep runtime wiring simple.

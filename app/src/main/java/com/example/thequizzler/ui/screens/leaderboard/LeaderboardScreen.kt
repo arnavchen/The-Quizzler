@@ -16,12 +16,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.thequizzler.QuizzlerApplication
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 
 data class PlayerScore(
@@ -31,7 +36,7 @@ data class PlayerScore(
 )
 
 @Composable
-fun LeaderboardScreen(navController: NavController) {
+fun LeaderboardScreen(navController: NavController, uiModel: LeaderboardUiModel? = null) {
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "LeaderboardScreen Composable CREATED")
     }
@@ -59,23 +64,42 @@ fun LeaderboardScreen(navController: NavController) {
             .background(gradient)
             .padding(horizontal = 16.dp, vertical = 24.dp)
     ) {
+        val model: LeaderboardUiModel = uiModel ?: run {
+            val context = LocalContext.current.applicationContext as QuizzlerApplication
+            val repository = context.container.quizzlerRepository
+
+            val factory = object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    if (modelClass.isAssignableFrom(LeaderboardViewModel::class.java)) {
+                        @Suppress("UNCHECKED_CAST")
+                        return LeaderboardViewModel(repository) as T
+                    }
+                    throw IllegalArgumentException("Unknown ViewModel class")
+                }
+            }
+
+            viewModel<LeaderboardViewModel>(factory = factory)
+        }
+
+        val sessions by model.highScores.collectAsState()
+        val leaderboard = sessions.mapIndexed { index, s -> PlayerScore(s.userName, s.score, index + 1) }
+
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            HorizontalLeaderboardScreen()
+            HorizontalLeaderboardScreen(leaderboard)
         } else {
-            VerticalLeaderboardScreen()
+            VerticalLeaderboardScreen(leaderboard)
         }
     }
 }
 
 @Composable
-fun VerticalLeaderboardScreen() {
-    val leaderboard = listOf(
-        PlayerScore("Arnav", 960, 1),
-        PlayerScore("Connor", 952, 2),
-        PlayerScore("Amav", 887, 3),
-        PlayerScore("Joel", 361, 4),
-        PlayerScore("Ian", 67, 5)
-    )
+fun VerticalLeaderboardScreen(leaderboard: List<PlayerScore> = listOf(
+    PlayerScore("Arnav", 960, 1),
+    PlayerScore("Connor", 952, 2),
+    PlayerScore("Amav", 887, 3),
+    PlayerScore("Joel", 361, 4),
+    PlayerScore("Ian", 67, 5)
+)) {
 
     Column(
         modifier = Modifier
@@ -100,14 +124,13 @@ fun VerticalLeaderboardScreen() {
 }
 
 @Composable
-fun HorizontalLeaderboardScreen() {
-    val leaderboard = listOf(
-        PlayerScore("Arnav", 960, 1),
-        PlayerScore("Connor", 952, 2),
-        PlayerScore("Amav", 887, 3),
-        PlayerScore("Joel", 361, 4),
-        PlayerScore("Ian", 67, 5)
-    )
+fun HorizontalLeaderboardScreen(leaderboard: List<PlayerScore> = listOf(
+    PlayerScore("Arnav", 960, 1),
+    PlayerScore("Connor", 952, 2),
+    PlayerScore("Amav", 887, 3),
+    PlayerScore("Joel", 361, 4),
+    PlayerScore("Ian", 67, 5)
+)) {
 
     Column(
         modifier = Modifier

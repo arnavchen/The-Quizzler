@@ -40,6 +40,7 @@ fun SettingsScreen(navController: NavController) {
     }
 }
 
+// Vertical Settings
 @Composable
 fun VerticalSettingsScreen() {
     LaunchedEffect(Unit) {

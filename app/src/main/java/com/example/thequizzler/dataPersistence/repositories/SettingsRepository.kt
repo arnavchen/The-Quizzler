@@ -1,4 +1,4 @@
-package com.example.thequizzler.dataPersistence
+package com.example.thequizzler.dataPersistence.repositories
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -10,7 +10,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-// At the top level of your file, outside the class, declare the DataStore instance.
+// At the top level of the file, outside the class, declare the DataStore instance.
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 /**

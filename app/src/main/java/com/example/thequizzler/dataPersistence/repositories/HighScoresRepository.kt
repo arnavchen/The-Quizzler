@@ -1,4 +1,4 @@
-package com.example.thequizzler.dataPersistence
+package com.example.thequizzler.dataPersistence.repositories
 
 import com.example.thequizzler.dataPersistence.daos.HighScoreDao
 import com.example.thequizzler.dataPersistence.daos.QuestionInstanceDao
@@ -10,73 +10,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 
 /**
- * Repository class that acts as a single source of truth for app data.
- * It abstracts the data sources (in this case, the Room DAOs) from the rest of the app.
+ * Repository class that acts as a single source of truth for HighScore data.
+ * It abstracts the data HighScore DAO from the rest of the app.
  *
- * @param sessionDao The Data Access Object for Session data.
- * @param questionInstanceDao The Data Access Object for QuestionInstance data.
  * @param highScoreDao The Data Access Object for HighScore data.
  */
-class QuizRepository(
-    private val sessionDao: SessionDao,
-    private val questionInstanceDao: QuestionInstanceDao,
+class HighScoresRepository(
     private val highScoreDao: HighScoreDao
 ) {
-
-    // --- Session Functions ---
-
-    /**
-     * Retrieves a session given its id
-     */
-    fun getSessionById(sessionId: Int): Flow<Session?> {
-        return sessionDao.getSessionById(sessionId)
-    }
-
-    /**
-     * Retrieves all sessions from the database, ordered by the most recent first.
-     */
-    val allSessions: Flow<List<Session>> = sessionDao.getAllSessions()
-
-    /**
-     * Inserts a new session and returns its newly generated ID.
-     */
-    suspend fun insertSession(session: Session): Long {
-        return sessionDao.insertSession(session)
-    }
-
-    /**
-     * Deletes a session given its id
-     */
-    suspend fun deleteSessionById(sessionId: Int) {
-        sessionDao.deleteSessionById(sessionId)
-    }
-
-    /**
-     * Deletes all sessions from the database. FOR TESTING PURPOSES ONLY.
-     */
-    suspend fun clearAllSessions() {
-        sessionDao.clearAllSessions()
-    }
-
-
-
-    // --- QuestionInstance Functions ---
-
-    /**
-     * Inserts a list of question instances for a completed quiz.
-     */
-    suspend fun insertAllQuestions(questions: List<QuestionInstance>) {
-        questionInstanceDao.insertAllQuestions(questions)
-    }
-
-    /**
-     * Retrieves all the question instances for a specific session.
-     */
-    fun getQuestionsForSession(sessionId: Int): Flow<List<QuestionInstance>> {
-        return questionInstanceDao.getQuestionsForSession(sessionId)
-    }
-
-    // --- High Score Functions ---
 
     /**
      * Retrieves the list of top 10 scoring sessions.

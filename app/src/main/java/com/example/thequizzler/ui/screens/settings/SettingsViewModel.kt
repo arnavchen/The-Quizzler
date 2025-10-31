@@ -2,7 +2,7 @@ package com.example.thequizzler.ui.screens.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.thequizzler.dataPersistence.SettingsRepository
+import com.example.thequizzler.dataPersistence.repositories.SettingsRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn

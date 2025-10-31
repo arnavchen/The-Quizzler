@@ -23,21 +23,15 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.thequizzler.dataPersistence.models.QuestionInstance
+import com.example.thequizzler.dataPersistence.models.Session
+import com.example.thequizzler.ui.AppViewModelProvider
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
-
-// Placeholder data classes
-data class QuestionInfo(
-    val questionText: String,
-    val userAnswer: String,
-    val correctAnswer: String
-)
-
-data class SessionInfo(
-    val playerName: String,
-    val score: String,
-    val dateTime: String,
-    val questions: List<QuestionInfo>
-)
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import kotlin.text.format
 
 @Composable
 fun SessionInfoScreen(navController: NavController, sessionId: String? = null) {
@@ -54,27 +48,20 @@ fun SessionInfoScreen(navController: NavController, sessionId: String? = null) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
 
-    // Temporary placeholder session (in a real app we'd load by sessionId)
-    val session = SessionInfo(
-        playerName = "Arnav",
-        dateTime = "9/25/2025, 9:01 PM",
-        score = "90",
-        questions = listOf(
-            QuestionInfo("Which of the following is closest to you?", "McDonald's", "Starbucks"),
-            QuestionInfo("How close to you is the nearest National Park?", "20 miles", "10 miles"),
-            QuestionInfo("Which state is directly north of Texas?", "Oklahoma", "Oklahoma"),
-        )
-    )
+    val viewModel: SessionInfoViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    val uiState by viewModel.uiState.collectAsState()
 
-    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        HorizontalSessionInfo(session, navController)
-    } else {
-        VerticalSessionInfo(session, navController)
+    if(uiState.session != null) {
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            HorizontalSessionInfo(uiState.session!!, questions=uiState.questions, navController)
+        } else {
+            VerticalSessionInfo(uiState.session!!, questions=uiState.questions, navController)
+        }
     }
 }
 
 @Composable
-fun VerticalSessionInfo(session: SessionInfo, navController: NavController) {
+fun VerticalSessionInfo(session: Session, questions: List<QuestionInstance>, navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -97,8 +84,11 @@ fun VerticalSessionInfo(session: SessionInfo, navController: NavController) {
                 }
 
                 Column(modifier = Modifier.padding(start = 8.dp)) {
-                    Text(session.playerName, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                    Text(session.dateTime, fontSize = 14.sp, color = Color.Gray)
+                    Text(session.userName, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                    Text(
+                        SimpleDateFormat("M/d/yyyy, h:mm a", Locale.getDefault()).format(Date(session.startTime)),
+                        fontSize = 14.sp, color = Color.Gray
+                    )
                 }
             }
 
@@ -114,7 +104,7 @@ fun VerticalSessionInfo(session: SessionInfo, navController: NavController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Question cards
-        session.questions.forEach { question ->
+        questions.forEach { question ->
             QuestionCard(question = question, onClick = {
                 // navigate to detail later
                 // navController.navigate("questionDetail/${question.id}")
@@ -125,7 +115,7 @@ fun VerticalSessionInfo(session: SessionInfo, navController: NavController) {
 }
 
 @Composable
-fun HorizontalSessionInfo(session: SessionInfo, navController: NavController) {
+fun HorizontalSessionInfo(session: Session, questions: List<QuestionInstance>, navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -147,8 +137,11 @@ fun HorizontalSessionInfo(session: SessionInfo, navController: NavController) {
                 }
 
                 Column(modifier = Modifier.padding(start = 8.dp)) {
-                    Text(session.playerName, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                    Text(session.dateTime, fontSize = 14.sp, color = Color.Gray)
+                    Text(session.userName, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                    Text(
+                        SimpleDateFormat("M/d/yyyy, h:mm a", Locale.getDefault()).format(Date(session.startTime)),
+                        fontSize = 14.sp, color = Color.Gray
+                    )
                 }
             }
 
@@ -170,7 +163,7 @@ fun HorizontalSessionInfo(session: SessionInfo, navController: NavController) {
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            session.questions.forEach { question ->
+            questions.forEach { question ->
                 QuestionCard(
                     question = question,
                     onClick = { /* Navigate to detailed question later */ },
@@ -183,7 +176,7 @@ fun HorizontalSessionInfo(session: SessionInfo, navController: NavController) {
 
 @Composable
 fun QuestionCard(
-    question: QuestionInfo,
+    question: QuestionInstance,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -201,7 +194,7 @@ fun QuestionCard(
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = question.questionText,
+                text = question.question,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 modifier = Modifier.padding(bottom = 12.dp)
@@ -218,7 +211,7 @@ fun QuestionCard(
                             .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
                             .padding(6.dp)
                     ) {
-                        Text(question.userAnswer)
+                        Text(question.userResponse)
                     }
                 }
                 Column(horizontalAlignment = Alignment.Start) {
@@ -228,7 +221,7 @@ fun QuestionCard(
                             .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
                             .padding(6.dp)
                     ) {
-                        Text(question.correctAnswer)
+                        Text(question.correctResponse)
                     }
                 }
             }

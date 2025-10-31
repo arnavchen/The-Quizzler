@@ -1,6 +1,5 @@
 package com.example.thequizzler.ui.screens.home
 
-import android.icu.lang.UCharacter
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,15 +8,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.MutableState
-import java.net.URLEncoder
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -25,12 +20,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.thequizzler.ui.AppViewModelProvider
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
+import java.net.URLEncoder
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, modifier: Modifier = Modifier) {
 
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "HomeScreen Composable CREATED")
@@ -45,18 +43,27 @@ fun HomeScreen(navController: NavController) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
 
-    // lift name state here so PlayButton can read it and navigate
-    val name = rememberSaveable { mutableStateOf("") }
+    val model: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
     if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
-        HorizontalHomeScreen(navController = navController, name = name)
+        HorizontalHomeScreen(
+            navController = navController,
+            name = model.playerName,
+            onNameChange = { model.onNameChange(it) },
+            modifier = modifier
+        )
     } else {
-        VerticalHomeScreen(navController = navController, name = name)
+        VerticalHomeScreen(
+            navController = navController,
+            name = model.playerName,
+            onNameChange = { model.onNameChange(it) },
+            modifier = modifier
+        )
     }
 }
 
 @Composable
-fun VerticalHomeScreen(navController: NavController, name: MutableState<String>) {
+fun VerticalHomeScreen(navController: NavController, name: String, onNameChange: (String) -> Unit, modifier: Modifier = Modifier) {
 
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "VerticalHomeScreen Composable CREATED")
@@ -69,21 +76,22 @@ fun VerticalHomeScreen(navController: NavController, name: MutableState<String>)
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxHeight()
-            .fillMaxWidth()
-            .padding(24.dp),
+        modifier = modifier.padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         QuizzlerTitle()
-        NameField(name)
+        NameField(
+            name = name,
+            onNameChange = onNameChange,
+            modifier = Modifier.padding(top = 16.dp)
+        )
         PlayButton(navController = navController, name = name)
     }
 }
 
 @Composable
-fun HorizontalHomeScreen(navController: NavController, name: MutableState<String>) {
+fun HorizontalHomeScreen(navController: NavController, name: String, onNameChange: (String) -> Unit, modifier: Modifier = Modifier) {
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "HorizontalHomeScreen Composable CREATED")
     }
@@ -95,10 +103,7 @@ fun HorizontalHomeScreen(navController: NavController, name: MutableState<String
     }
 
     androidx.compose.foundation.layout.Row(
-        modifier = Modifier
-            .fillMaxHeight()
-            .fillMaxWidth()
-            .padding(24.dp),
+        modifier = modifier.padding(24.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
@@ -107,14 +112,18 @@ fun HorizontalHomeScreen(navController: NavController, name: MutableState<String
             verticalArrangement = Arrangement.Center
         ) {
             QuizzlerTitle()
-            NameField(name)
+            NameField(
+                name = name,
+                onNameChange = onNameChange,
+                modifier = Modifier.padding(top = 16.dp)
+            )
             PlayButton(navController = navController, name = name)
         }
     }
 }
 
 @Composable
-fun NameField(name: MutableState<String>, modifier: Modifier = Modifier) {
+fun NameField(name: String, onNameChange: (String) -> Unit, modifier: Modifier = Modifier) {
 
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "NameField Composable CREATED")
@@ -127,8 +136,9 @@ fun NameField(name: MutableState<String>, modifier: Modifier = Modifier) {
     }
 
     OutlinedTextField(
-        value = name.value,
-        onValueChange = { text -> name.value = text },
+        value = name,
+        onValueChange = onNameChange,
+        label = { Text("Enter your name") },
         modifier = modifier
     )
 }
@@ -150,13 +160,12 @@ fun QuizzlerTitle() {
         text = "The Quizzler",
         fontSize = 24.sp,
         textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth()
     )
 }
 
 
 @Composable
-fun PlayButton(navController: NavController, name: MutableState<String>) {
+fun PlayButton(navController: NavController, name: String) {
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "PlayButton Composable CREATED")
     }
@@ -169,7 +178,7 @@ fun PlayButton(navController: NavController, name: MutableState<String>) {
 
     Button(onClick = {
         // navigate to MockQuizScreen with encoded player name
-        val player = URLEncoder.encode(name.value.ifEmpty { "Player" }, "UTF-8")
+        val player = URLEncoder.encode(name.ifEmpty { "Player" }, "UTF-8")
         navController.navigate("mock_quiz/$player")
     }) {
         Text("Play")

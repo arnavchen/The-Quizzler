@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.thequizzler.ui.AppViewModelProvider
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 
 @Composable
@@ -38,23 +39,8 @@ fun SettingsScreen(navController: NavController) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
 
-    // Provide a SettingsUiModel: real ViewModel at runtime, preview model in Compose preview
-    val settingsUiModel: SettingsUiModel = run {
-        val inspection = LocalInspectionMode.current
-        if (inspection) {
-            remember { PreviewSettingsUiModel() }
-        } else {
-            val appContext = LocalContext.current.applicationContext
-            val repository = (appContext as com.example.thequizzler.QuizzlerApplication).container.settingsRepository
-            val factory = object : ViewModelProvider.Factory {
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    @Suppress("UNCHECKED_CAST")
-                    return SettingsViewModel(repository) as T
-                }
-            }
-            viewModel<SettingsViewModel>(factory = factory)
-        }
-    }
+    val model: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    val settingsUiModel = model
 
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
         HorizontalSettingsScreen(settingsUiModel)

@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.thequizzler.QuizzlerApplication
+import com.example.thequizzler.ui.AppViewModelProvider
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 
 data class PlayerScore(
@@ -64,19 +65,10 @@ fun LeaderboardScreen(navController: NavController) {
             .padding(horizontal = 16.dp, vertical = 24.dp)
     ) {
         val context = LocalContext.current.applicationContext as QuizzlerApplication
-        val repository = context.container.quizzlerRepository
+        val repository = context.container.highScoresRepository
 
-        val factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                if (modelClass.isAssignableFrom(LeaderboardViewModel::class.java)) {
-                    @Suppress("UNCHECKED_CAST")
-                    return LeaderboardViewModel(repository) as T
-                }
-                throw IllegalArgumentException("Unknown ViewModel class")
-            }
-        }
+        val model: LeaderboardViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
-        val model: LeaderboardViewModel = viewModel(factory = factory)
         val sessions by model.highScores.collectAsState()
         val leaderboard = sessions.mapIndexed { index, s -> PlayerScore(s.userName, s.score, index + 1) }
 
@@ -84,6 +76,7 @@ fun LeaderboardScreen(navController: NavController) {
             HorizontalLeaderboardScreen(leaderboard)
         } else {
             VerticalLeaderboardScreen(leaderboard)
+
         }
     }
 }

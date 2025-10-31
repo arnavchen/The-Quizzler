@@ -35,10 +35,26 @@ fun BottomNavBar(navController: NavHostController) {
         items.forEach { screen ->
             NavigationBarItem(
                 selected = currentRoute == screen.route,
-                onClick = { navController.navigate(screen.route) },
-                label = { Text(screen.route[0].uppercaseChar().toString()) },
-                icon = { /* Replace labels with icons later */ }
+                onClick = {
+                    navController.navigate(screen.route) {
+                        // Pop up to the start destination of the graph to
+                        // avoid building up a large back stack of destinations
+                        // on the back button as users select items.
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        // Avoid multiple copies of the same destination when
+                        // re-selecting the same item
+                        launchSingleTop = true
+                        // Restore state when re-selecting a previously selected item
+                        restoreState = true
+                    }
+                },
+                label = { Text(screen.route.substring(0, 1).uppercase()) },
+                icon = { /* Icons later */ }
             )
         }
     }
+// ...
+
 }

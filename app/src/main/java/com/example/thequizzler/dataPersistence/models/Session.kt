@@ -13,5 +13,8 @@ data class Session(
     @ColumnInfo(name = "start_time")
     val startTime: Long,
 
+    @ColumnInfo(name = "num_correct")
+    val numCorrect: Int,
+
     val score: Int
 )

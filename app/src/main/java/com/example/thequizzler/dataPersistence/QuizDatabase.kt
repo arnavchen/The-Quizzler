@@ -17,7 +17,7 @@ import com.example.thequizzler.dataPersistence.models.Session
  */
 @Database(
     entities = [Session::class, QuestionInstance::class, HighScore::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class QuizDatabase : RoomDatabase() {
@@ -51,6 +51,7 @@ abstract class QuizDatabase : RoomDatabase() {
                     "quizzler_database" // This is the file name for your database.
                 )
                     // You can add migrations here if you change the schema later.
+                    .fallbackToDestructiveMigration(true)
                     .build()
                 INSTANCE = instance
                 // return the instance

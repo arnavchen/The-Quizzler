@@ -22,17 +22,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.thequizzler.dataPersistence.models.Session
+import com.example.thequizzler.ui.AppViewModelProvider
+import com.example.thequizzler.ui.screens.settings.SettingsViewModel
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
-
-// Temporary data class for placeholder sessions
-data class Session(
-    val id: Int,
-    val playerName: String,
-    val score: Int,
-    val correct: Int,
-    val incorrect: Int,
-    val rank: String
-)
 
 @Composable
 fun SessionsScreen(navController: NavController) {
@@ -49,6 +43,9 @@ fun SessionsScreen(navController: NavController) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
 
+    val model: SessionsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    val sessionsUiState by model.sessionsUiState.collectAsState()
+
     // Subtle gradient background
     val gradient = Brush.verticalGradient(
         colors = listOf(
@@ -64,21 +61,15 @@ fun SessionsScreen(navController: NavController) {
             .padding(horizontal = 16.dp, vertical = 24.dp)
     ) {
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            HorizontalSessionsScreen(navController)
+            HorizontalSessionsScreen(navController, sessionsUiState.sessionList)
         } else {
-            VerticalSessionsScreen(navController)
+            VerticalSessionsScreen(navController, sessionsUiState.sessionList)
         }
     }
 }
 
 @Composable
-fun VerticalSessionsScreen(navController: NavController) {
-    val sessions = listOf(
-        Session(1, "Arnav", 960, 9, 1, "1st"),
-        Session(2, "Connor", 952, 8, 2, "2nd"),
-        Session(3, "Ian", 67, 1, 9, "3rd"),
-        Session(4, "Joel", 361, 5, 5, "4th")
-    )
+fun VerticalSessionsScreen(navController: NavController, sessions: List<Session>) {
 
     Column(
         modifier = Modifier
@@ -103,13 +94,7 @@ fun VerticalSessionsScreen(navController: NavController) {
 }
 
 @Composable
-fun HorizontalSessionsScreen(navController: NavController) {
-    val sessions = listOf(
-        Session(1, "Arnav", 960, 9, 1, "1st"),
-        Session(2, "Connor", 952, 8, 2, "2nd"),
-        Session(3, "Ian", 67, 1, 9, "3rd"),
-        Session(4, "Joel", 361, 5, 5, "4th")
-    )
+fun HorizontalSessionsScreen(navController: NavController, sessions: List<Session>) {
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -139,12 +124,6 @@ fun HorizontalSessionsScreen(navController: NavController) {
 
 @Composable
 fun SessionCard(session: Session, navController: NavController, modifier: Modifier = Modifier) {
-    val rankColor = when (session.rank) {
-        "1st" -> Color(0xFFFFD700) // Gold
-        "2nd" -> Color(0xFFC0C0C0) // Silver
-        "3rd" -> Color(0xFFCD7F32) // Bronze
-        else -> MaterialTheme.colorScheme.tertiary
-    }
 
     Card(
         modifier = modifier
@@ -163,7 +142,7 @@ fun SessionCard(session: Session, navController: NavController, modifier: Modifi
                 .fillMaxWidth()
         ) {
             Text(
-                text = session.playerName,
+                text = session.userName,
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
                 color = MaterialTheme.colorScheme.onSurface
@@ -183,25 +162,17 @@ fun SessionCard(session: Session, navController: NavController, modifier: Modifi
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "${session.correct} correct",
+                    text = "${session.numCorrect} correct",
                     color = Color(0xFF2E7D32),
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "${session.incorrect} wrong",
+                    text = "${10 - session.numCorrect} wrong",
                     color = Color(0xFFC62828),
                     fontWeight = FontWeight.SemiBold
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = session.rank,
-                color = rankColor,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
         }
     }
 }

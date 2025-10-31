@@ -8,5 +8,5 @@ sealed class Screen(val route: String) {
     object MockQuiz : Screen("mock_quiz/{playerName}")
     object SessionInfo : Screen("sessionInfo/{sessionId}")
 
-    object Results : Screen("results/{score}")
+    object Results : Screen("results")
 }

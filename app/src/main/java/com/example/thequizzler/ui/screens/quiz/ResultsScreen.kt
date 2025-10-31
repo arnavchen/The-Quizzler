@@ -1,7 +1,7 @@
-package com.example.thequizzler.ui.screens
+package com.example.thequizzler.ui.screens.quiz
 
+import android.content.res.Configuration
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -9,10 +9,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,11 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.thequizzler.R
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 
 @Composable
-fun ResultsScreen(navController: NavController, finalScore: Int) {
+fun ResultsScreen(navController: NavController, quizViewModel: QuizViewModel) {
 
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "ResultsScreen Composable CREATED")
@@ -36,13 +36,21 @@ fun ResultsScreen(navController: NavController, finalScore: Int) {
         }
     }
 
+    // Get the final quiz state to display the score
+    val quizState by quizViewModel.quizState.collectAsState()
+
+    // This LaunchedEffect runs ONCE. It's the perfect place to trigger the save.
+    LaunchedEffect(Unit) {
+        quizViewModel.finalizeAndSaveQuiz()
+    }
+
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
 
-    if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
-        HorizontalResultsScreen(navController = navController, finalScore = finalScore)
+    if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        HorizontalResultsScreen(navController = navController, finalScore = quizState.score)
     } else {
-        VerticalResultsScreen(navController = navController, finalScore = finalScore)
+        VerticalResultsScreen(navController = navController, finalScore = quizState.score)
     }
 }
 
@@ -81,7 +89,7 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
-                onClick = { navController.navigate("home") },
+                onClick = { navController.navigate("home_screen") },
                 modifier = Modifier.size(width = 120.dp, height = 80.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -90,7 +98,7 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
             }
 
             Button(
-                onClick = { navController.navigate("leaderboard") },
+                onClick = { navController.navigate("leaderboard_screen") },
                 modifier = Modifier.size(width = 120.dp, height = 80.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -138,7 +146,7 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(
-                onClick = { navController.navigate("home") },
+                onClick = { navController.navigate("home_screen") },
                 modifier = Modifier.size(width = 120.dp, height = 80.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -147,7 +155,7 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
             }
 
             Button(
-                onClick = { navController.navigate("leaderboard") },
+                onClick = { navController.navigate("leaderboard_screen") },
                 modifier = Modifier.size(width = 120.dp, height = 80.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {

@@ -177,7 +177,6 @@ fun PlayButton(navController: NavController, name: String) {
     }
 
     Button(onClick = {
-        // navigate to MockQuizScreen with encoded player name
         val player = URLEncoder.encode(name.ifEmpty { "Player" }, "UTF-8")
         navController.navigate("mock_quiz/$player")
     }) {

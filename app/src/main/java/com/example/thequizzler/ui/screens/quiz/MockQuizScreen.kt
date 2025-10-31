@@ -53,7 +53,6 @@ fun MockQuizScreen(navController: NavController, playerName: String?, quizViewMo
         )
     }
 
-    // Start the quiz in the ViewModel.
     LaunchedEffect(Unit) {
         quizViewModel.startQuiz(playerName ?: "Player", mockQuestions)
     }
@@ -67,7 +66,6 @@ fun MockQuizScreen(navController: NavController, playerName: String?, quizViewMo
 
     var timeLeftMs by remember { mutableStateOf(totalTimeMs) }
 
-    // Start a countdown whenever the questionIndex changes.
     LaunchedEffect(questionIndex) {
         val startTime = System.currentTimeMillis()
         // reset timeLeft
@@ -100,7 +98,6 @@ fun MockQuizScreen(navController: NavController, playerName: String?, quizViewMo
             pointsAwarded = points
         )
 
-        // Move to the next question or finish the quiz
         if (questionIndex < mockQuestions.lastIndex) {
             questionIndex++
         } else {
@@ -108,7 +105,6 @@ fun MockQuizScreen(navController: NavController, playerName: String?, quizViewMo
         }
     }
 
-    // Prevent rendering Contacts.Intents.UI before questions are loaded into the state
     if (quizState.generatedQuestions.isNotEmpty() && questionIndex < quizState.generatedQuestions.size) {
         val currentGeneratedQuestion = quizState.generatedQuestions[questionIndex]
 

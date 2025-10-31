@@ -38,7 +38,6 @@ class HighScoresRepository(
             // High score list is empty, any score is a high score.
             true
         } else if (highScoresList.size < 10) {
-            // High score list has fewer than 10 entries, new score automatically qualifies.
             true
         } else {
             // High score list is full, check if new score is higher than the lowest.
@@ -46,8 +45,7 @@ class HighScoresRepository(
         }
 
         if (isHighScore) {
-            // If the list was full, remove the old lowest score to make room.
-            if (highScoresList.size >= 10 && lowestHighScore != null) {
+            if (highScoresList.size >= 10) {
                 highScoreDao.deleteHighScoreBySessionId(lowestHighScore.id)
             }
             // Insert the new high score entry.

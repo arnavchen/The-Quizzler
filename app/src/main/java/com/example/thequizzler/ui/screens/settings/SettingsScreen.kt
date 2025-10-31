@@ -2,6 +2,11 @@ package com.example.thequizzler.ui.screens.settings
 
 import android.content.res.Configuration
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -33,15 +38,34 @@ fun SettingsScreen(navController: NavController) {
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
 
+    // Provide a SettingsUiModel: real ViewModel at runtime, preview model in Compose preview
+    val settingsUiModel: SettingsUiModel = run {
+        val inspection = LocalInspectionMode.current
+        if (inspection) {
+            remember { PreviewSettingsUiModel() }
+        } else {
+            val appContext = LocalContext.current.applicationContext
+            val repository = (appContext as com.example.thequizzler.QuizzlerApplication).container.settingsRepository
+            val factory = object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    @Suppress("UNCHECKED_CAST")
+                    return SettingsViewModel(repository) as T
+                }
+            }
+            viewModel<SettingsViewModel>(factory = factory)
+        }
+    }
+
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        HorizontalSettingsScreen()
+        HorizontalSettingsScreen(settingsUiModel)
     } else {
-        VerticalSettingsScreen()
+        VerticalSettingsScreen(settingsUiModel)
     }
 }
 
+// Vertical Settings
 @Composable
-fun VerticalSettingsScreen() {
+fun VerticalSettingsScreen(settingsUiModel: SettingsUiModel) {
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "VerticalSettingsScreen Composable CREATED")
     }
@@ -67,12 +91,12 @@ fun VerticalSettingsScreen() {
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
-        SettingsOptions()
+        SettingsOptions(settingsUiModel)
     }
 }
 
 @Composable
-fun HorizontalSettingsScreen() {
+fun HorizontalSettingsScreen(settingsUiModel: SettingsUiModel) {
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "HorizontalSettingsScreen Composable CREATED")
     }
@@ -105,27 +129,27 @@ fun HorizontalSettingsScreen() {
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            SettingsOptions()
+            SettingsOptions(settingsUiModel)
         }
     }
 }
 
 @Composable
-fun SettingsOptions() {
-    var locationEnabled by rememberSaveable { mutableStateOf(false) }
-    var offlineMode by rememberSaveable { mutableStateOf(true) }
-    var measurementSystem by rememberSaveable { mutableStateOf("Met") }
+fun SettingsOptions(settingsUiModel: SettingsUiModel) {
+    val locationEnabled by settingsUiModel.isLocationEnabled.collectAsState(initial = false)
+    val offlineMode by settingsUiModel.isOfflineMode.collectAsState(initial = true)
+    val measurementSystem by settingsUiModel.measurementSystem.collectAsState(initial = "Met")
 
     SettingToggleRow(
         title = "Location Questions",
         checked = locationEnabled,
-        onCheckedChange = { locationEnabled = it }
+        onCheckedChange = { settingsUiModel.setLocationEnabled(it) }
     )
 
     SettingToggleRow(
         title = "Offline Mode",
         checked = offlineMode,
-        onCheckedChange = { offlineMode = it }
+        onCheckedChange = { settingsUiModel.setOfflineMode(it) }
     )
 
     Spacer(modifier = Modifier.height(12.dp))
@@ -143,13 +167,13 @@ fun SettingsOptions() {
         MeasurementSystemButton(
             text = "Imp",
             selected = measurementSystem == "Imp",
-            onClick = { measurementSystem = "Imp" }
+            onClick = { settingsUiModel.setMeasurementSystem("Imp") }
         )
         Spacer(modifier = Modifier.width(8.dp))
         MeasurementSystemButton(
             text = "Met",
             selected = measurementSystem == "Met",
-            onClick = { measurementSystem = "Met" }
+            onClick = { settingsUiModel.setMeasurementSystem("Met") }
         )
     }
 }

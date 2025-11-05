@@ -45,7 +45,7 @@ class HighScoresRepository(
 
         if (isHighScore) {
             if (highScoresList.size >= 10) {
-                highScoreDao.deleteHighScoreBySessionId(lowestHighScore.id)
+                lowestHighScore?.let { highScoreDao.deleteHighScoreBySessionId(it.id) }
             }
             // Insert the new high score entry.
             highScoreDao.insertHighScore(HighScore(sessionId = newSession.id))

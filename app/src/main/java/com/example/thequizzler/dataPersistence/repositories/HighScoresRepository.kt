@@ -34,15 +34,14 @@ class HighScoresRepository(
         val lowestHighScore = highScoreDao.getLowestHighScore().firstOrNull()
         val highScoresList = highScores.firstOrNull() ?: emptyList()
 
-        val isHighScore = if (lowestHighScore == null) {
-            // High score list is empty, any score is a high score.
-            true
-        } else if (highScoresList.size < 10) {
-            true
-        } else {
-            // High score list is full, check if new score is higher than the lowest.
-            newSession.score > lowestHighScore.score
-        }
+        val isHighScore: Boolean = lowestHighScore?.let { lowest ->
+            if (highScoresList.size < 10) {
+                true
+            } else {
+                // High score list is full, check if new score is higher than the lowest.
+                newSession.score > lowest.score
+            }
+        } ?: true
 
         if (isHighScore) {
             if (highScoresList.size >= 10) {

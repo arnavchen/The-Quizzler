@@ -114,6 +114,7 @@ fun MockQuizScreen(navController: NavController, playerName: String?, quizViewMo
                 questionNumber = questionIndex + 1,
                 totalQuestions = quizState.generatedQuestions.size,
                 score = quizState.score,
+                timeLeftSeconds = (timeLeftMs / 1000L).toInt(),
                 onAnswer = onAnswerSelected
             )
         } else {
@@ -122,6 +123,7 @@ fun MockQuizScreen(navController: NavController, playerName: String?, quizViewMo
                 questionNumber = questionIndex + 1,
                 totalQuestions = quizState.generatedQuestions.size,
                 score = quizState.score,
+                timeLeftSeconds = (timeLeftMs / 1000L).toInt(),
                 onAnswer = onAnswerSelected
             )
         }
@@ -134,20 +136,31 @@ fun VerticalMockQuizScreen(
     questionNumber: Int,
     totalQuestions: Int,
     score: Int,
+    timeLeftSeconds: Int,
     onAnswer: (String) -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
         verticalArrangement = Arrangement.SpaceAround,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Score: $score", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text(
+                text = "${timeLeftSeconds}s",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.secondary
+            )
             Text("Q$questionNumber/$totalQuestions", color = MaterialTheme.colorScheme.primary)
         }
+
         Text(
             text = question.questionText,
             fontSize = 22.sp,
@@ -174,6 +187,7 @@ fun HorizontalMockQuizScreen(
     questionNumber: Int,
     totalQuestions: Int,
     score: Int,
+    timeLeftSeconds: Int,
     onAnswer: (String) -> Unit
 ) {
     Row(
@@ -192,15 +206,24 @@ fun HorizontalMockQuizScreen(
             )
         }
         Column(
-            modifier = Modifier.weight(1f).padding(start = 24.dp),
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 24.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Score: $score", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text(
+                    text = "${timeLeftSeconds}s",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.secondary
+                )
                 Text("Q$questionNumber/$totalQuestions", color = MaterialTheme.colorScheme.primary)
             }
             Spacer(Modifier.height(24.dp))
@@ -235,6 +258,7 @@ fun VerticalMockQuizPreview() {
             questionNumber = 1,
             totalQuestions = 10,
             score = 50,
+            timeLeftSeconds = 10,
             onAnswer = {}
         )
     }
@@ -254,6 +278,7 @@ fun HorizontalMockQuizPreview() {
             questionNumber = 2,
             totalQuestions = 10,
             score = 70,
+            timeLeftSeconds = 10,
             onAnswer = {}
         )
     }

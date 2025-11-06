@@ -87,8 +87,6 @@ fun MockQuizScreen(navController: NavController, playerName: String?, quizViewMo
         } else {
             0
         }
-
-        // Record the answer into the viewModel's questionInstance record
         quizViewModel.recordAnswer(
             questionNumber = questionIndex + 1,
             questionText = currentQuestion.questionText,

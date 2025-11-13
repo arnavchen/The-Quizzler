@@ -4,8 +4,10 @@ import android.content.res.Configuration
 import android.provider.Contacts
 import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
@@ -21,6 +23,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.thequizzler.navigation.Screen
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
+import com.example.thequizzler.ui.theme.AppSpacing
 
 @Composable
 fun MockQuizScreen(navController: NavController, playerName: String?, quizViewModel: QuizViewModel) {
@@ -140,7 +143,7 @@ fun VerticalMockQuizScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(AppSpacing.large),
         verticalArrangement = Arrangement.SpaceAround,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -149,30 +152,42 @@ fun VerticalMockQuizScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Score: $score", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text("Score: $score", style = MaterialTheme.typography.titleMedium)
             Text(
                 text = "${timeLeftSeconds}s",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.ExtraBold,
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.secondary
             )
-            Text("Q$questionNumber/$totalQuestions", color = MaterialTheme.colorScheme.primary)
+            Text("Q$questionNumber/$totalQuestions", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium)
         }
 
-        Text(
-            text = question.questionText,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(vertical = 16.dp)
-        )
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = AppSpacing.medium),
+            tonalElevation = 2.dp,
+        ) {
+            Text(
+                text = question.questionText,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(AppSpacing.medium)
+            )
+        }
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.medium),
             modifier = Modifier.fillMaxWidth()
         ) {
             question.answers.forEach { answerText ->
-                Button(onClick = { onAnswer(answerText) }, modifier = Modifier.fillMaxWidth()) {
-                    Text(answerText)
+                ElevatedButton(
+                    onClick = { onAnswer(answerText) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.elevatedButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Text(answerText, style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
@@ -189,7 +204,9 @@ fun HorizontalMockQuizScreen(
     onAnswer: (String) -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(AppSpacing.large),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -226,12 +243,19 @@ fun HorizontalMockQuizScreen(
             }
             Spacer(Modifier.height(24.dp))
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.medium),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 question.answers.forEach { answerText ->
-                    Button(onClick = { onAnswer(answerText) }, modifier = Modifier.fillMaxWidth()) {
-                        Text(answerText)
+                    ElevatedButton(
+                        onClick = { onAnswer(answerText) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.elevatedButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Text(answerText, style = MaterialTheme.typography.bodyLarge)
                     }
                 }
             }

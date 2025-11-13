@@ -1,7 +1,6 @@
 package com.example.thequizzler.ui.screens.quiz
 
 import android.content.res.Configuration
-import android.provider.Contacts
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ElevatedButton
@@ -20,7 +19,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.thequizzler.navigation.Screen
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 import com.example.thequizzler.ui.theme.AppSpacing

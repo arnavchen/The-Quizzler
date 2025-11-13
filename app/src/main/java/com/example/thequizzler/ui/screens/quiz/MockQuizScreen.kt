@@ -55,7 +55,9 @@ fun MockQuizScreen(navController: NavController, playerName: String?, quizViewMo
     }
 
     LaunchedEffect(Unit) {
-        quizViewModel.startQuiz(playerName ?: "Player", mockQuestions)
+        // Start the quiz and let the ViewModel decide whether to generate online questions
+        // based on settings (Offline Mode / Location).
+        quizViewModel.startQuiz(playerName ?: "Player")
     }
 
     val quizState by quizViewModel.quizState.collectAsState()
@@ -80,8 +82,8 @@ fun MockQuizScreen(navController: NavController, playerName: String?, quizViewMo
         }
     }
 
-    val onAnswerSelected: (String) -> Unit = { userAnswer ->
-        val currentQuestion = mockQuestions[questionIndex]
+    val onAnswerSelected: (String) -> Unit = fun(userAnswer: String) {
+        val currentQuestion = quizState.generatedQuestions.getOrNull(questionIndex) ?: return
         val wasCorrect = userAnswer == currentQuestion.correctAnswer
         val points = if (wasCorrect) {
             (100.0 * (timeLeftMs.toDouble() / totalTimeMs.toDouble())).roundToInt()
@@ -97,7 +99,7 @@ fun MockQuizScreen(navController: NavController, playerName: String?, quizViewMo
             pointsAwarded = points
         )
 
-        if (questionIndex < mockQuestions.lastIndex) {
+        if (questionIndex < quizState.generatedQuestions.lastIndex) {
             questionIndex++
         } else {
             navController.navigate(Screen.Results.route)

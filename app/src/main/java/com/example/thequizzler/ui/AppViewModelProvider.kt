@@ -62,7 +62,10 @@ object AppViewModelProvider {
             QuizViewModel(
                 quizzlerApplication().container.sessionRepository,
                 quizzlerApplication().container.questionInstanceRepository,
-                quizzlerApplication().container.highScoresRepository
+                quizzlerApplication().container.highScoresRepository,
+                quizzlerApplication().container.settingsRepository,
+                // For now use the in-memory FakePlacesRepository so generation works without API keys.
+                com.example.thequizzler.quiz.templates.FakePlacesRepository()
             )
         }
     }

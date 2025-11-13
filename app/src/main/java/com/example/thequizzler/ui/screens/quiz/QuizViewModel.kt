@@ -7,6 +7,13 @@ import com.example.thequizzler.dataPersistence.models.Session
 import com.example.thequizzler.dataPersistence.repositories.HighScoresRepository
 import com.example.thequizzler.dataPersistence.repositories.QuestionInstancesRepository
 import com.example.thequizzler.dataPersistence.repositories.SessionsRepository
+import com.example.thequizzler.dataPersistence.repositories.SettingsRepository
+import com.example.thequizzler.quiz.templates.PlacesRepository
+import com.example.thequizzler.quiz.templates.TemplatesRegistry
+import com.example.thequizzler.quiz.templates.QuestionGenerationContext
+import com.example.thequizzler.quiz.templates.FakePlacesRepository
+import com.example.thequizzler.quiz.templates.SimpleLocation
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -29,17 +36,58 @@ data class QuizState(
 class QuizViewModel(
     private val sessionsRepository: SessionsRepository,
     private val questionInstancesRepository: QuestionInstancesRepository,
-    private val highScoresRepository: HighScoresRepository
+    private val highScoresRepository: HighScoresRepository,
+    private val settingsRepository: SettingsRepository,
+    private val placesRepository: PlacesRepository
 ) : ViewModel() {
 
     private val _quizState = MutableStateFlow(QuizState())
     val quizState = _quizState.asStateFlow()
 
-    fun startQuiz(playerName: String, questions: List<GeneratedQuestion>) {
-        _quizState.value = QuizState(
-            playerName = playerName,
-            generatedQuestions = questions
-        )
+    /**
+     * Start a quiz. If `staticQuestions` is provided and non-empty it will be used directly.
+     * Otherwise this will attempt to generate up to 10 questions using the templates.
+     * Generation respects the settings repository: when offline mode is enabled, a local
+     * fake repository will be used so no network calls are attempted.
+     */
+    fun startQuiz(
+        playerName: String,
+        staticQuestions: List<GeneratedQuestion>? = null,
+        location: SimpleLocation? = null
+    ) {
+        // If the caller provides explicit static questions, use them immediately.
+        if (!staticQuestions.isNullOrEmpty()) {
+            _quizState.value = QuizState(playerName = playerName, generatedQuestions = staticQuestions)
+            return
+        }
+
+        // Otherwise generate questions asynchronously based on settings and templates.
+        viewModelScope.launch {
+            val isOffline = settingsRepository.isOfflineMode.first()
+            val isLocationEnabled = settingsRepository.isLocationEnabled.first()
+
+            // If offline mode is on or location questions are disabled, use a fake repo to avoid network.
+            val repoToUse: PlacesRepository = if (isOffline || !isLocationEnabled) FakePlacesRepository() else placesRepository
+
+            val ctx = QuestionGenerationContext(location = location, placesRepo = repoToUse)
+            val templates = TemplatesRegistry.allTemplates().shuffled()
+            val instances = mutableListOf<com.example.thequizzler.quiz.templates.QuestionInstance>()
+            for (t in templates) {
+                try {
+                    val inst = t.generate(ctx)
+                    if (inst != null) instances += inst
+                } catch (e: Exception) {
+                    // Ignore generation errors for individual templates and continue
+                }
+                if (instances.size >= 10) break
+            }
+
+            val generated = instances.map {
+                GeneratedQuestion(it.questionText, it.answers, it.correctAnswer)
+            }
+
+            _quizState.value = QuizState(playerName = playerName, generatedQuestions = generated)
+        }
     }
 
     fun recordAnswer(

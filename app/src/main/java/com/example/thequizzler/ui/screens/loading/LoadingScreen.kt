@@ -23,15 +23,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// imports intentionally minimal — resources/navigation not needed for preview visuals
 import com.example.thequizzler.ui.theme.AppSpacing
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 
-/**
- * A simple loading screen with an app title and a circular progress indicator.
- * This file is preview-only for now and includes a small helper `LoadingHost`
- * which can be used during integration to show loading UI while content loads.
- */
 
 @Composable
 fun LoadingScreen(
@@ -39,7 +33,6 @@ fun LoadingScreen(
     message: String? = null,
     modifier: Modifier = Modifier
 ) {
-    // subtle rotation animation for the indicator to make preview a bit more lively
     val infiniteTransition = rememberInfiniteTransition()
     val angle = infiniteTransition.animateFloat(
         initialValue = 0f,

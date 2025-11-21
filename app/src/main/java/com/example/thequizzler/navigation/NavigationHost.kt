@@ -99,9 +99,11 @@ private fun NavGraphBuilder.quizGraph(navController: NavHostController) {
             val playerName = backStackEntry.arguments?.getString("playerName") ?: "Player"
             val uiState by quizViewModel.uiState.collectAsState()
 
+            // Provide a Context from the composable scope
+            val context = LocalContext.current
+
             // This LaunchedEffect triggers the question generation
             LaunchedEffect(Unit) {
-                val context = LocalContext.current
                 val simpleLocation: SimpleLocation? = if (ContextCompat.checkSelfPermission(
                         context,
                         Manifest.permission.ACCESS_FINE_LOCATION

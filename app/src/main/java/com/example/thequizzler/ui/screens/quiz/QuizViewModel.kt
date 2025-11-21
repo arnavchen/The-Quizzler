@@ -40,14 +40,16 @@ class QuizViewModel(
      * Prepares and starts a new quiz.
      * It generates questions and initializes the QuizManager.
      */
-    fun startQuiz(playerName: String) {
+    fun startQuiz(playerName: String, location: SimpleLocation?) {
         viewModelScope.launch {
             _uiState.value = QuizUiState(isLoading = true, playerName = playerName)
 
             // Get settings
+            val storedLocationEnabled = settingsRepository.isLocationEnabled.first()
             val settings = QuizSettings(
                 isOfflineMode = settingsRepository.isOfflineMode.first(),
-                isLocationEnabled = settingsRepository.isLocationEnabled.first()
+                // Treat location as disabled if the stored setting is true but we don't actually have a location.
+                isLocationEnabled = storedLocationEnabled && (location != null)
             )
 
             // Generate questions
@@ -57,6 +59,23 @@ class QuizViewModel(
             // Create the manager and update the UI state
             val manager = QuizManager(questions)
             _uiState.value = QuizUiState(quizManager = manager, isLoading = false, playerName = playerName)
+        }
+    }
+
+    /**
+     * If the stored setting says location is enabled but we don't actually have a location,
+     * persistently disable the location setting. This avoids silently attempting to use
+     * location when it isn't available and aligns stored preferences with runtime capability.
+     *
+     * Note: this will change the user's saved setting. Only call this when you have decided
+     * that persistent disabling is desired (e.g., security/privacy requirement).
+     */
+    fun disableLocationPreferenceIfUnavailable(location: SimpleLocation?) {
+        viewModelScope.launch {
+            val stored = settingsRepository.isLocationEnabled.first()
+            if (stored && location == null) {
+                settingsRepository.setLocationEnabled(false)
+            }
         }
     }
 

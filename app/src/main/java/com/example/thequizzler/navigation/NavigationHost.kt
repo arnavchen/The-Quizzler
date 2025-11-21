@@ -7,6 +7,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import android.Manifest
+import android.content.Context
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
+import com.example.thequizzler.quiz.templates.SimpleLocation
+import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
@@ -58,6 +67,19 @@ fun NavigationHost(navController: NavHostController, modifier: Modifier = Modifi
     }
 }
 
+private suspend fun getLastKnownSimpleLocation(context: Context): SimpleLocation? = suspendCancellableCoroutine { cont ->
+    val fused = LocationServices.getFusedLocationProviderClient(context)
+    try {
+        fused.lastLocation.addOnSuccessListener { loc ->
+            cont.resume(loc?.let { SimpleLocation(it.latitude, it.longitude) })
+        }.addOnFailureListener {
+            cont.resume(null)
+        }
+    } catch (e: SecurityException) {
+        cont.resume(null)
+    }
+}
+
 // This new function defines the entire quiz flow in a clean, nested graph.
 private fun NavGraphBuilder.quizGraph(navController: NavHostController) {
     // Define a new graph with a unique route "quiz_flow"
@@ -79,7 +101,24 @@ private fun NavGraphBuilder.quizGraph(navController: NavHostController) {
 
             // This LaunchedEffect triggers the question generation
             LaunchedEffect(Unit) {
-                quizViewModel.startQuiz(playerName)
+                val context = LocalContext.current
+                val simpleLocation: SimpleLocation? = if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    try {
+                        getLastKnownSimpleLocation(context)
+                    } catch (e: Exception) {
+                        null
+                    }
+                } else null
+
+                // If we couldn't obtain a location but the user had location enabled,
+                // persistently disable the stored preference for security/privacy.
+                quizViewModel.disableLocationPreferenceIfUnavailable(simpleLocation)
+
+                quizViewModel.startQuiz(playerName, simpleLocation)
             }
 
             // This LaunchedEffect listens for when loading is finished

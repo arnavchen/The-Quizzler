@@ -79,5 +79,5 @@ class QuestionGenerator(
 data class QuizSettings(
     val isOfflineMode: Boolean,
     val isLocationEnabled: Boolean,
-    // Add other settings like measurement system here later
+    val isImperialSystem: Boolean
 )

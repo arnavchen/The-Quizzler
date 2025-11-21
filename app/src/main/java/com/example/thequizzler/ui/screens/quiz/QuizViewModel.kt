@@ -49,7 +49,8 @@ class QuizViewModel(
             val settings = QuizSettings(
                 isOfflineMode = settingsRepository.isOfflineMode.first(),
                 // Treat location as disabled if the stored setting is true but we don't actually have a location.
-                isLocationEnabled = storedLocationEnabled && (location != null)
+                isLocationEnabled = storedLocationEnabled && (location != null),
+                isImperialSystem = settingsRepository.measurementSystem.first() == "Imp"
             )
 
             // Generate questions

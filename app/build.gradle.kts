@@ -28,6 +28,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["PLACES_API_KEY"] = localProperties.getProperty("PLACES_API_KEY", "")
     }
 
     buildTypes {

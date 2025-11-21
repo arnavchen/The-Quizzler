@@ -5,6 +5,7 @@ import com.example.thequizzler.quiz.GeneratedQuestion
 import com.example.thequizzler.quiz.QuestionServices
 import com.example.thequizzler.quiz.apiRepositories.PlaceResult
 import com.example.thequizzler.quiz.templates.IQuestionTemplate
+import com.example.thequizzler.quiz.QuizSettings
 import com.example.thequizzler.quiz.templates.SimpleLocation
 import com.example.thequizzler.quiz.templates.TemplateRequirement
 import com.google.android.libraries.places.api.Places
@@ -20,7 +21,7 @@ object WhichIsCloserTemplate : IQuestionTemplate {
     private val franchises = PlacesKeywords.franchises
     private val placeTypes = PlacesKeywords.placeTypes
 
-    override suspend fun generate(services: QuestionServices, location: SimpleLocation?): GeneratedQuestion? {
+    override suspend fun generate(services: QuestionServices, location: SimpleLocation?, settings: QuizSettings): GeneratedQuestion? {
 
         if(location == null) {
             return null;

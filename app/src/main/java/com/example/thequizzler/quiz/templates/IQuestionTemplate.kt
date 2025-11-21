@@ -2,6 +2,7 @@ package com.example.thequizzler.quiz.templates
 
 import com.example.thequizzler.quiz.GeneratedQuestion
 import com.example.thequizzler.quiz.QuestionServices
+import com.example.thequizzler.quiz.QuizSettings
 
 // Defines the requirements a template may have to be able to be used
 enum class TemplateRequirement {
@@ -25,7 +26,8 @@ interface IQuestionTemplate {
     /**
      * Generates a single question instance.
      * @param services A container for dependencies like the Places API repository.
+     * @param settings The quiz settings (e.g., measurement system) to tailor generation.
      * @return A GeneratedQuestion, or null if generation fails.
      */
-    suspend fun generate(services: QuestionServices, location: SimpleLocation?): GeneratedQuestion?
+    suspend fun generate(services: QuestionServices, location: SimpleLocation?, settings: QuizSettings): GeneratedQuestion?
 }

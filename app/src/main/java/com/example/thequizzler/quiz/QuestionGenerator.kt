@@ -37,7 +37,7 @@ class QuestionGenerator(
             if (questions.size >= count) break
 
             // Generate one question at a time.
-            val newQuestion = availableTemplates.random().generate(services, location)
+            val newQuestion = availableTemplates.random().generate(services, location, settings)
             if (newQuestion != null) {
                 // Add the question to a set to automatically handle distinctness.
                 questions.add(newQuestion)

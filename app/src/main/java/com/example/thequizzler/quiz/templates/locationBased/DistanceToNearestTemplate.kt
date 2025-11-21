@@ -2,6 +2,7 @@ package com.example.thequizzler.quiz.templates.locationBased
 
 import android.util.Log
 import com.example.thequizzler.quiz.GeneratedQuestion
+import com.example.thequizzler.quiz.QuizSettings
 import com.example.thequizzler.quiz.QuestionServices
 import com.example.thequizzler.quiz.apiRepositories.PlaceResult
 import com.example.thequizzler.quiz.templates.IQuestionTemplate
@@ -18,7 +19,7 @@ object DistanceToNearestTemplate : IQuestionTemplate {
     private val placeTypes = PlacesKeywords.placeTypes
 
 
-    override suspend fun generate(services: QuestionServices, location: SimpleLocation?): GeneratedQuestion? {
+    override suspend fun generate(services: QuestionServices, location: SimpleLocation?, settings: QuizSettings): GeneratedQuestion? {
 
         if(location == null) {
             return null;
@@ -43,8 +44,8 @@ object DistanceToNearestTemplate : IQuestionTemplate {
             return null;
         }
 
-        val correctAnswer = formatDistance(nearest.distanceMeters)
-        val distractors = generateDistractors(nearest.distanceMeters)
+        val correctAnswer = formatDistance(nearest.distanceMeters, settings.isImperialSystem)
+        val distractors = generateDistractors(nearest.distanceMeters, settings.isImperialSystem)
         val answers = (distractors + correctAnswer).shuffled()
 
         return GeneratedQuestion(
@@ -57,7 +58,7 @@ object DistanceToNearestTemplate : IQuestionTemplate {
 
     }
 
-    private fun generateDistractors(correctDistance: Int): List<String> {
+    private fun generateDistractors(correctDistance: Int, isImperial: Boolean): List<String> {
         val distractors = mutableSetOf<String>()
         val rnd = Random.Default
 
@@ -75,16 +76,26 @@ object DistanceToNearestTemplate : IQuestionTemplate {
 
             val distractorValue = (correctDistance * randomFactor).toInt().coerceAtLeast(10)
 
-            distractors.add(formatDistance(distractorValue))
+            distractors.add(formatDistance(distractorValue, isImperial))
         }
         return distractors.toList()
     }
 
-    private fun formatDistance(meters: Int): String {
-        return if (meters >= 1000) {
-            String.format("%.1f km", meters / 1000.0)
+    private fun formatDistance(meters: Int, isImperial: Boolean): String {
+        if (isImperial) {
+            val metersPerMile = 1609.344
+            return if (meters >= metersPerMile) {
+                String.format("%.1f mi", meters / metersPerMile)
+            } else {
+                val feet = (meters * 3.28084).toInt()
+                "$feet ft"
+            }
         } else {
-            "$meters m"
+            return if (meters >= 1000) {
+                String.format("%.1f km", meters / 1000.0)
+            } else {
+                "$meters m"
+            }
         }
     }
 }

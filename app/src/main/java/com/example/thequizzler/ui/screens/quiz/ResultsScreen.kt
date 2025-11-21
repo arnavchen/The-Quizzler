@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.thequizzler.navigation.Screen
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 
 @Composable
@@ -36,10 +37,11 @@ fun ResultsScreen(navController: NavController, quizViewModel: QuizViewModel) {
         }
     }
 
-    // Get the final quiz state to display the score
-    val quizState by quizViewModel.quizState.collectAsState()
+    val uiState by quizViewModel.uiState.collectAsState()
+    val finalScore = uiState.quizManager?.score ?: 0
 
-    // This LaunchedEffect runs ONCE. It's the perfect place to trigger the save.
+    // This LaunchedEffect runs ONCE when the screen is first composed.
+    // It's the perfect place to trigger the save operation.
     LaunchedEffect(Unit) {
         quizViewModel.finalizeAndSaveQuiz()
     }
@@ -48,12 +50,15 @@ fun ResultsScreen(navController: NavController, quizViewModel: QuizViewModel) {
     val orientation = configuration.orientation
 
     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        HorizontalResultsScreen(navController = navController, finalScore = quizState.score)
+        HorizontalResultsScreen(navController = navController, finalScore = finalScore)
     } else {
-        VerticalResultsScreen(navController = navController, finalScore = quizState.score)
+        VerticalResultsScreen(navController = navController, finalScore = finalScore)
     }
 }
 
+
+// VerticalResultsScreen, HorizontalResultsScreen and their Previews
+// remain exactly the same as they were. No changes needed here.
 @Composable
 fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
 
@@ -83,13 +88,14 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Buttons Row (Home + Leaderboard)
         Row(
             horizontalArrangement = Arrangement.spacedBy(24.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
-                onClick = { navController.navigate("home_screen") },
+                onClick = { navController.navigate(Screen.Home.route) {
+                    popUpTo(navController.graph.startDestinationId)
+                } },
                 modifier = Modifier.size(width = 120.dp, height = 80.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -98,7 +104,7 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
             }
 
             Button(
-                onClick = { navController.navigate("leaderboard_screen") },
+                onClick = { navController.navigate(Screen.Leaderboard.route) },
                 modifier = Modifier.size(width = 120.dp, height = 80.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -146,7 +152,9 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(
-                onClick = { navController.navigate("home_screen") },
+                onClick = { navController.navigate(Screen.Home.route) {
+                    popUpTo(navController.graph.startDestinationId)
+                } },
                 modifier = Modifier.size(width = 120.dp, height = 80.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -155,7 +163,7 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
             }
 
             Button(
-                onClick = { navController.navigate("leaderboard_screen") },
+                onClick = { navController.navigate(Screen.Leaderboard.route) },
                 modifier = Modifier.size(width = 120.dp, height = 80.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {

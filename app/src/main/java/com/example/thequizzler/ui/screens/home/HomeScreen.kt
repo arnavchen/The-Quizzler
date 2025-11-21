@@ -178,7 +178,7 @@ fun PlayButton(navController: NavController, name: String) {
 
     Button(onClick = {
         val player = URLEncoder.encode(name.ifEmpty { "Player" }, "UTF-8")
-        navController.navigate("mock_quiz/$player")
+        navController.navigate("loading/$player")
     }) {
         Text("Play")
     }

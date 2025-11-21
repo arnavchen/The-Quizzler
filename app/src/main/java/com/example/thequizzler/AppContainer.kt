@@ -6,6 +6,8 @@ import com.example.thequizzler.dataPersistence.repositories.HighScoresRepository
 import com.example.thequizzler.dataPersistence.repositories.QuestionInstancesRepository
 import com.example.thequizzler.dataPersistence.repositories.SessionsRepository
 import com.example.thequizzler.dataPersistence.repositories.SettingsRepository
+import com.example.thequizzler.quiz.QuestionServices
+import com.example.thequizzler.quiz.apiRepositories.PlacesRepository
 
 /**
  * A container class for dependencies that are shared across the application.
@@ -17,6 +19,8 @@ interface AppContainer {
     val questionInstanceRepository: QuestionInstancesRepository
     val highScoresRepository: HighScoresRepository
     val settingsRepository: SettingsRepository
+    val questionServices: QuestionServices
+    val placesRepository: PlacesRepository
 }
 
 /**
@@ -43,5 +47,17 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
     // Lazily create the SettingsRepository.
     override val settingsRepository: SettingsRepository by lazy {
         SettingsRepository(context)
+    }
+
+    // Lazily create the QuestionServices container
+    override val questionServices: QuestionServices by lazy {
+        QuestionServices(
+            placesRepository = this.placesRepository
+        )
+    }
+
+    // Lazily create the Google Places Repository
+    override val placesRepository: PlacesRepository by lazy {
+        PlacesRepository(context)
     }
 }

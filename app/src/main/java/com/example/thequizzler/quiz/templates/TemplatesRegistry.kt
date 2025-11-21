@@ -139,22 +139,3 @@ class DistanceToNearestTemplate(
         return if (meters >= 1000) String.format("%.1f km", meters / 1000.0) else "$meters m"
     }
 }
-
-/**
- * A tiny fake repository used for local development and tests — deterministic but synthetic.
- * It does not call any network services and is safe to use without API keys.
- */
-class FakePlacesRepository : PlacesRepository {
-    override suspend fun findNearestByKeyword(keyword: String, lat: Double, lng: Double): PlaceResult? {
-        // Simulate a small delay to mimic IO
-        delay(10)
-        // Deterministic pseudo-random distance so tests are stable
-        val seed = abs((keyword + lat.toString() + lng.toString()).hashCode())
-        val dist = 30 + (seed % 7000) // 30m .. ~7km
-        val name = "$keyword ${(seed % 5) + 1}"
-        // place slightly offset from the user's lat/lng so distances appear realistic
-        val latOffset = ((seed % 100) - 50) / 10000.0
-        val lngOffset = (((seed / 31) % 100) - 50) / 10000.0
-        return PlaceResult(name, lat + latOffset, lng + lngOffset, dist)
-    }
-}

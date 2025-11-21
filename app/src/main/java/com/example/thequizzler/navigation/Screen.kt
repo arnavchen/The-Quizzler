@@ -9,5 +9,5 @@ sealed class Screen(val route: String) {
     object SessionInfo : Screen("sessionInfo/{sessionId}")
 
     object Results : Screen("results")
-    object Loading : Screen("loading")
+    object Loading : Screen("loading/{playerName}")
 }

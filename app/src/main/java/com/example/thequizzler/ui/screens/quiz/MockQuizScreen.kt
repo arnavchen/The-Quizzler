@@ -9,8 +9,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
-import kotlin.math.roundToInt
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -19,15 +20,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.thequizzler.quiz.GeneratedQuestion
 import com.example.thequizzler.navigation.Screen
+import com.example.thequizzler.ui.screens.loading.LoadingHost
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 import com.example.thequizzler.ui.theme.AppSpacing
 
 @Composable
-fun MockQuizScreen(navController: NavController, playerName: String?, quizViewModel: QuizViewModel) {
+fun MockQuizScreen(navController: NavController, quizViewModel: QuizViewModel) {
 
     LaunchedEffect(Unit) {
-        Log.d("Lifecycle", "MockQuizScreen Composable CREATED")
+        Log.d("Lifecycle", "MockQuizScreen Composable CREATED");
     }
 
     DisposableEffect(Unit) {
@@ -36,94 +39,49 @@ fun MockQuizScreen(navController: NavController, playerName: String?, quizViewMo
         }
     }
 
-    val configuration = LocalConfiguration.current
-    val orientation = configuration.orientation
+    val uiState by quizViewModel.uiState.collectAsState()
+    val quizManager = uiState.quizManager
 
-    val mockQuestions = remember {
-        listOf(
-            GeneratedQuestion("What is 2+2?", listOf("3", "4", "5", "6"), "4"),
-            GeneratedQuestion("What color is the sky?", listOf("Blue", "Green", "Red", "Yellow"), "Blue"),
-            GeneratedQuestion("Which planet is known as the Red Planet?", listOf("Earth", "Mars", "Jupiter", "Venus"), "Mars"),
-            GeneratedQuestion("Which of the following is closest to you?", listOf("Your Laptop", "Living Mammoth", "The Moon", "Reaching Your Hopes and Dreams"), "Your Laptop"),
-            GeneratedQuestion("What is the capital of France?", listOf("Paris", "London", "Berlin", "Madrid"), "Paris"),
-            GeneratedQuestion("What is the largest mammal?", listOf("Elephant", "Blue Whale", "Giraffe", "Hippopotamus"), "Blue Whale"),
-            GeneratedQuestion("What State are you in?", listOf("Texas", "California", "New York", "Despair"), "Despair"),
-            GeneratedQuestion("Which is a fruit?", listOf("Carrot", "Cherry", "Drywall", "Loops"), "Cherry"),
-            GeneratedQuestion("What is H2O?", listOf("Water", "Earth", "Fire", "Air"), "Water"),
-            GeneratedQuestion("Did you enjoy this quiz?", listOf("Yes", "No", "Absolutely Not", "End my Suffering"), "Yes")
-        )
-    }
+    if (quizManager != null && !quizManager.isFinished) {
+        val currentQuestion = quizManager.currentQuestion!!
+        var timeLeftMs by remember { mutableStateOf(currentQuestion.timeLimitSeconds * 1000L) }
+        val startTime by remember { mutableStateOf(System.currentTimeMillis()) }
 
-    LaunchedEffect(Unit) {
-        // Start the quiz and let the ViewModel decide whether to generate online questions
-        // based on settings (Offline Mode / Location).
-        quizViewModel.startQuiz(playerName ?: "Player")
-    }
-
-    val quizState by quizViewModel.quizState.collectAsState()
-    var questionIndex by remember { mutableStateOf(0) }
-    var score by remember { mutableStateOf(0) }
-
-    val totalTimeSeconds = 15.0 // default total seconds per question
-    val totalTimeMs = (totalTimeSeconds * 1000).toLong()
-
-    var timeLeftMs by remember { mutableStateOf(totalTimeMs) }
-
-    LaunchedEffect(questionIndex) {
-        val startTime = System.currentTimeMillis()
-        // reset timeLeft
-        timeLeftMs = totalTimeMs
-        while (true) {
-            val elapsed = System.currentTimeMillis() - startTime
-            val remaining = totalTimeMs - elapsed
-            timeLeftMs = if (remaining > 0) remaining else 0L
-            if (timeLeftMs <= 0L) break
-            delay(50L)
+        LaunchedEffect(quizManager.currentQuestionIndex) {
+            timeLeftMs = currentQuestion.timeLimitSeconds * 1000L
+            val questionStartTime = System.currentTimeMillis()
+            while (true) {
+                val elapsed = System.currentTimeMillis() - questionStartTime
+                val remaining = (currentQuestion.timeLimitSeconds * 1000L) - elapsed
+                timeLeftMs = if (remaining > 0) remaining else 0L
+                if (timeLeftMs <= 0L) break
+                delay(50L)
+            }
         }
-    }
 
-    val onAnswerSelected: (String) -> Unit = fun(userAnswer: String) {
-        val currentQuestion = quizState.generatedQuestions.getOrNull(questionIndex) ?: return
-        val wasCorrect = userAnswer == currentQuestion.correctAnswer
-        val points = if (wasCorrect) {
-            (100.0 * (timeLeftMs.toDouble() / totalTimeMs.toDouble())).roundToInt()
-        } else {
-            0
+        val onAnswerSelected: (String) -> Unit = { userAnswer ->
+            val timeTaken = System.currentTimeMillis() - startTime
+            quizManager.submitAnswer(userAnswer, timeTaken)
+            if (quizManager.isFinished) {
+                navController.navigate(Screen.Results.route)
+            }
         }
-        quizViewModel.recordAnswer(
-            questionNumber = questionIndex + 1,
-            questionText = currentQuestion.questionText,
-            userAnswer = userAnswer,
-            correctAnswer = currentQuestion.correctAnswer,
-            wasCorrect = wasCorrect,
-            pointsAwarded = points
-        )
-
-        if (questionIndex < quizState.generatedQuestions.lastIndex) {
-            questionIndex++
-        } else {
-            navController.navigate(Screen.Results.route)
-        }
-    }
-
-    if (quizState.generatedQuestions.isNotEmpty() && questionIndex < quizState.generatedQuestions.size) {
-        val currentGeneratedQuestion = quizState.generatedQuestions[questionIndex]
 
         if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             HorizontalMockQuizScreen(
-                question = currentGeneratedQuestion,
-                questionNumber = questionIndex + 1,
-                totalQuestions = quizState.generatedQuestions.size,
-                score = quizState.score,
+                question = currentQuestion,
+                questionNumber = quizManager.currentQuestionIndex + 1,
+                totalQuestions = quizManager.totalQuestions,
+                score = quizManager.score,
                 timeLeftSeconds = (timeLeftMs / 1000L).toInt(),
                 onAnswer = onAnswerSelected
             )
         } else {
             VerticalMockQuizScreen(
-                question = currentGeneratedQuestion,
-                questionNumber = questionIndex + 1,
-                totalQuestions = quizState.generatedQuestions.size,
-                score = quizState.score,
+                question = currentQuestion,
+                questionNumber = quizManager.currentQuestionIndex + 1,
+                totalQuestions = quizManager.totalQuestions,
+                score = quizManager.score,
                 timeLeftSeconds = (timeLeftMs / 1000L).toInt(),
                 onAnswer = onAnswerSelected
             )
@@ -264,8 +222,7 @@ fun HorizontalMockQuizScreen(
 }
 
 
-// In: app/src/main/java/com/example/thequizzler/ui/screens/quiz/MockQuizScreen.kt
-
+// Previews
 @Preview(showBackground = true)
 @Composable
 fun VerticalMockQuizPreview() {
@@ -273,7 +230,9 @@ fun VerticalMockQuizPreview() {
         val sampleQuestion = GeneratedQuestion(
             questionText = "What is the capital of France?",
             answers = listOf("Paris", "London", "Berlin", "Madrid"),
-            correctAnswer = "Paris"
+            correctAnswer = "Paris",
+            checkAnswer = {it == "Paris"},
+            timeLimitSeconds = 15
         )
         VerticalMockQuizScreen(
             question = sampleQuestion,
@@ -286,14 +245,16 @@ fun VerticalMockQuizPreview() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 800, heightDp = 480) // Adjusted size for landscape
+@Preview(showBackground = true, widthDp = 800, heightDp = 480)
 @Composable
 fun HorizontalMockQuizPreview() {
     TheQuizzlerTheme {
         val sampleQuestion = GeneratedQuestion(
             questionText = "Which planet is known as the Red Planet?",
             answers = listOf("Earth", "Mars", "Jupiter", "Venus"),
-            correctAnswer = "Mars"
+            correctAnswer = "Mars",
+            checkAnswer = {it == "Mars"},
+            timeLimitSeconds = 15
         )
         HorizontalMockQuizScreen(
             question = sampleQuestion,
@@ -305,4 +266,3 @@ fun HorizontalMockQuizPreview() {
         )
     }
 }
-

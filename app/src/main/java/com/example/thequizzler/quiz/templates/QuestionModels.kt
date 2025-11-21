@@ -1,5 +1,7 @@
 package com.example.thequizzler.quiz.templates
 
+import com.example.thequizzler.quiz.QuestionServices
+
 /**
  * Lightweight models used by question templates and generators.
  */
@@ -14,26 +16,15 @@ data class QuestionInstance(
 /** Simple lat/lng holder to avoid depending on Android Location in the templates. */
 data class SimpleLocation(val latitude: Double, val longitude: Double)
 
-/** Minimal place result used by templates. distanceMeters is optional — generators may compute it. */
-data class PlaceResult(
-    val name: String,
-    val latitude: Double,
-    val longitude: Double,
-    val distanceMeters: Int? = null
-)
-
-/**
- * Abstraction to get place data. Implementations may call Google Places or return a stub.
- * For the in-memory demo we add a FakePlacesRepository below (see TemplatesRegistry).
- */
-interface PlacesRepository {
-    suspend fun findNearestByKeyword(keyword: String, lat: Double, lng: Double): PlaceResult?
-}
-
 /**
  * Context passed into the templates so they can generate a concrete QuestionInstance.
  */
 data class QuestionGenerationContext(
     val location: SimpleLocation?,
-    val placesRepo: PlacesRepository
+    val services: QuestionServices
 )
+
+// how long to send email from current location to _____
+// many non-api questions will be generated using key value pairs
+//        e.g. average animal generation -> days, historical event -> data
+//

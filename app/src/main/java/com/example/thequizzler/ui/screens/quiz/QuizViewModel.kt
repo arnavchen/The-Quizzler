@@ -72,9 +72,6 @@ class QuizViewModel(
      * If the stored setting says location is enabled but we don't actually have a location,
      * persistently disable the location setting. This avoids silently attempting to use
      * location when it isn't available and aligns stored preferences with runtime capability.
-     *
-     * Note: this will change the user's saved setting. Only call this when you have decided
-     * that persistent disabling is desired (e.g., security/privacy requirement).
      */
     fun disableLocationPreferenceIfUnavailable(location: SimpleLocation?) {
         viewModelScope.launch {

@@ -57,12 +57,9 @@ fun NavigationHost(navController: NavHostController, modifier: Modifier = Modifi
             SessionsScreen(navController)
         }
         composable(Screen.SessionInfo.route) { backStackEntry ->
-            // You can keep this as is, it's correct
             SessionInfoScreen(navController = navController)
         }
 
-        // REMOVE the old, separate composables for MockQuiz and Results
-        // and replace them with this single call to the new graph function.
         quizGraph(navController)
     }
 }
@@ -80,11 +77,9 @@ private suspend fun getLastKnownSimpleLocation(context: Context): SimpleLocation
     }
 }
 
-// This new function defines the entire quiz flow in a clean, nested graph.
 private fun NavGraphBuilder.quizGraph(navController: NavHostController) {
-    // Define a new graph with a unique route "quiz_flow"
     navigation(
-        startDestination = Screen.Loading.route, // The flow now starts at the loading screen
+        startDestination = Screen.Loading.route, // The flow starts at the loading screen
         route = "quiz_flow/{playerName}"
     ) {
         // 1. The Loading Screen destination
@@ -148,13 +143,12 @@ private fun NavGraphBuilder.quizGraph(navController: NavHostController) {
 
         // 2. The Mock Quiz Screen destination
         composable(Screen.MockQuiz.route) { backStackEntry ->
-            // Get the SAME shared ViewModel from the graph
+            // Get the shared ViewModel from the graph
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry("quiz_flow/{playerName}")
             }
             val quizViewModel: QuizViewModel = viewModel(parentEntry, factory = AppViewModelProvider.Factory)
 
-            // The screen is now much simpler and doesn't need to handle loading
             MockQuizScreen(
                 navController = navController,
                 quizViewModel = quizViewModel
@@ -163,7 +157,7 @@ private fun NavGraphBuilder.quizGraph(navController: NavHostController) {
 
         // 3. The Results Screen destination
         composable(Screen.Results.route) { backStackEntry ->
-            // Get the SAME shared ViewModel from the graph
+            // Get the shared ViewModel from the graph
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry("quiz_flow/{playerName}")
             }

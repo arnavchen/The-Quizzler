@@ -1,18 +1,24 @@
 package com.example.thequizzler.quiz
 
+import android.location.Location
 import com.example.thequizzler.quiz.apiRepositories.PlacesRepository
 
 /**
- * A service locator class that holds all the different repositories
- * and services needed for question generation.
+ * A provider for location services. This can be a real GPS implementation
+ * or a mock one for testing.
+ */
+interface LocationProvider {
+    fun getLastKnownLocation(): Location?
+}
+
+/**
+ * A service locator that holds API repositories and the state for the
+ * current question generation session.
  *
- * Instead of passing each repository individually, we pass this single
- * container object. When you add new APIs (e.g., Weather), you will
- * add the new repository here.
+ * Instead of passing each item individually, we pass this single container.
  */
 data class QuestionServices(
-    val placesRepository: PlacesRepository
-    // Add future repositories here, e.g.:
-    // val weatherRepository: WeatherRepository,
-    // val stockMarketRepository: StockMarketRepository
+    // --- Repositories ---
+    val placesRepository: PlacesRepository,
+    // Add future repositories here
 )

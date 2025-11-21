@@ -1,75 +1,56 @@
 package com.example.thequizzler.quiz
 
-import com.example.thequizzler.quiz.templates.QuestionGenerationContext
 import com.example.thequizzler.quiz.templates.SimpleLocation
+import com.example.thequizzler.quiz.templates.TemplateRequirement
 import com.example.thequizzler.quiz.templates.TemplatesRegistry
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
-/**
- * Responsible for generating a list of quiz questions based on provided settings.
- * This class abstracts away the details of how questions are created (e.g., from templates).
- *
- * @param settings The quiz settings, determining if online features are used.
- * @param services A container of repositories to use for generating questions
- */
 class QuestionGenerator(
     private val settings: QuizSettings,
-    private val services: QuestionServices
+    private val services: QuestionServices,
+    private val location: SimpleLocation?
 ) {
-    /**
-     * Generates a list of unique quiz questions.
-     *
-     * @param count The desired number of questions.
-     * @param location The user's current location, if available.
-     * @return A list of [GeneratedQuestion] objects.
-     */
-    suspend fun generateQuestions(count: Int, location: SimpleLocation?): List<GeneratedQuestion> {
-        val questions = mutableListOf<GeneratedQuestion>()
-        val mutex = Mutex() // To safely add questions from concurrent jobs
+    suspend fun generateQuestions(count: Int): List<GeneratedQuestion>? {
 
-        // Use a fake repository if offline or location is disabled
-        val servicesToUse = if (settings.isOfflineMode || !settings.isLocationEnabled) {
-            QuestionServices(placesRepository = FakePlacesRepository())
-        } else {
-            services // Use the real services
+        // Build a set of currently satisfied requirements from the quiz settings.
+        val satisfiedRequirements = mutableSetOf<TemplateRequirement>()
+        if (settings.isLocationEnabled) satisfiedRequirements.add(TemplateRequirement.LOCATION)
+        if (!settings.isOfflineMode) satisfiedRequirements.add(TemplateRequirement.INTERNET)
+
+        // Filter available templates. A template is usable if its 'requirements' set
+        // is a subset of the 'satisfiedRequirements' set.
+        val availableTemplates = TemplatesRegistry.getAllTemplates().filter { template ->
+            satisfiedRequirements.containsAll(template.requirements)
         }
 
-        // The context now gets the entire services object
-        val context = QuestionGenerationContext(location, servicesToUse)
+        if (availableTemplates.isEmpty()) {
+            return emptyList() // No templates available for this mode
+        }
 
-        val templates = TemplatesRegistry.allTemplates().shuffled()
+        val questions = mutableSetOf<GeneratedQuestion>()
+        val maxAttempts = count * 5 // Safety break to prevent infinite loops
 
-        // Launch concurrent jobs to generate questions faster
-        coroutineScope {
-            for (template in templates) {
-                if (questions.size >= count) break
-                launch {
-                    try {
-                        val instance = template.generate(context)
-                        if (instance != null) {
-                            val generatedQuestion = GeneratedQuestion(
-                                questionText = instance.questionText,
-                                answers = instance.answers.shuffled(),
-                                checkAnswer = { userAnswer -> userAnswer == instance.correctAnswer },
-                                correctAnswer = instance.correctAnswer,
-                                timeLimitSeconds = instance.timeLimitSeconds
-                            )
-                            mutex.withLock {
-                                if (questions.size < count) {
-                                    questions.add(generatedQuestion)
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {
-                        // Ignore errors from individual templates
-                    }
-                }
+        for (i in 0 until maxAttempts) {
+            // If we have enough questions, stop trying to generate more.
+            if (questions.size >= count) break
+
+            // Generate one question at a time.
+            val newQuestion = availableTemplates.random().generate(services, location)
+            if (newQuestion != null) {
+                // Add the question to a set to automatically handle distinctness.
+                questions.add(newQuestion)
             }
         }
-        return questions
+
+        // If, after all attempts, we still don't have enough questions, consider it a failure.
+        if (questions.size < count) {
+            return null
+        }
+
+        // Return a distinct list to avoid duplicate questions if the pool is small
+        return questions.take(count)
     }
 }
 
@@ -79,5 +60,5 @@ class QuestionGenerator(
 data class QuizSettings(
     val isOfflineMode: Boolean,
     val isLocationEnabled: Boolean,
-    val isImperialSystem: Boolean
+    val isImperialSystem: Boolean,
 )

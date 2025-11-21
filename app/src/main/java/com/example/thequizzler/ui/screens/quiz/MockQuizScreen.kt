@@ -45,7 +45,7 @@ fun MockQuizScreen(navController: NavController, quizViewModel: QuizViewModel) {
     if (quizManager != null && !quizManager.isFinished) {
         val currentQuestion = quizManager.currentQuestion!!
         var timeLeftMs by remember { mutableStateOf(currentQuestion.timeLimitSeconds * 1000L) }
-        val startTime by remember { mutableStateOf(System.currentTimeMillis()) }
+        val startTime by remember(quizManager.currentQuestionIndex) { mutableStateOf(System.currentTimeMillis()) }
 
         LaunchedEffect(quizManager.currentQuestionIndex) {
             timeLeftMs = currentQuestion.timeLimitSeconds * 1000L

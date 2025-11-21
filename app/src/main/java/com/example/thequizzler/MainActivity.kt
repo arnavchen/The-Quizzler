@@ -16,8 +16,14 @@ import androidx.navigation.compose.rememberNavController
 import com.example.thequizzler.ui.components.BottomNavBar
 import com.example.thequizzler.navigation.NavigationHost
 import com.example.thequizzler.navigation.Screen
+import android.Manifest
+import androidx.compose.runtime.LaunchedEffect
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("Lifecycle", "MainActivity onCreate")
@@ -25,6 +31,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             TheQuizzlerTheme {
                 Log.d("Lifecycle", "MainActivity Compose setContent")
+
+                val locationPermissionState = rememberPermissionState(
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+
+                LaunchedEffect(Unit) {
+                    if (!locationPermissionState.status.isGranted) {
+                        locationPermissionState.launchPermissionRequest()
+                    }
+                }
 
                 val navController = rememberNavController()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()

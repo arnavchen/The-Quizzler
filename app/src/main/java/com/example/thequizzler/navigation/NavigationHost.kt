@@ -85,13 +85,13 @@ private fun NavGraphBuilder.quizGraph(navController: NavHostController) {
     // Define a new graph with a unique route "quiz_flow"
     navigation(
         startDestination = Screen.Loading.route, // The flow now starts at the loading screen
-        route = "quiz_flow"
+        route = "quiz_flow/{playerName}"
     ) {
         // 1. The Loading Screen destination
         composable(Screen.Loading.route) { backStackEntry ->
             // Get the parent entry of the GRAPH to share the ViewModel
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry("quiz_flow")
+                navController.getBackStackEntry("quiz_flow/{playerName}")
             }
             // Create the ViewModel scoped to the graph
             val quizViewModel: QuizViewModel = viewModel(parentEntry, factory = AppViewModelProvider.Factory)
@@ -117,14 +117,14 @@ private fun NavGraphBuilder.quizGraph(navController: NavHostController) {
                 } else null
 
                 // If we couldn't obtain a location but the user had location enabled,
-                // persistently disable the stored preference for security/privacy.
+                // disable the location setting to avoid errors
                 quizViewModel.disableLocationPreferenceIfUnavailable(simpleLocation)
 
                 quizViewModel.startQuiz(playerName, simpleLocation)
             }
 
             // This LaunchedEffect listens for when loading is finished
-            LaunchedEffect(uiState.isLoading) {
+            LaunchedEffect(uiState.isLoading, uiState.generationFailed, uiState.quizManager) {
                 if (!uiState.isLoading && uiState.quizManager != null) {
                     // Navigate to the quiz screen and remove the loading screen from the back stack
                     navController.navigate(Screen.MockQuiz.route) {
@@ -133,14 +133,24 @@ private fun NavGraphBuilder.quizGraph(navController: NavHostController) {
                 }
             }
 
-            LoadingScreen(message = "Generating your personalized quiz...")
+            LoadingScreen(
+                message = "Generating your personalized quiz...",
+                generationFailed = uiState.generationFailed,
+                onReturnHome = {
+                    // Navigate back to the home screen
+                    navController.navigate(Screen.Home.route) {
+                        // Clear the entire back stack up to Home
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                }
+            )
         }
 
         // 2. The Mock Quiz Screen destination
         composable(Screen.MockQuiz.route) { backStackEntry ->
             // Get the SAME shared ViewModel from the graph
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry("quiz_flow")
+                navController.getBackStackEntry("quiz_flow/{playerName}")
             }
             val quizViewModel: QuizViewModel = viewModel(parentEntry, factory = AppViewModelProvider.Factory)
 
@@ -155,7 +165,7 @@ private fun NavGraphBuilder.quizGraph(navController: NavHostController) {
         composable(Screen.Results.route) { backStackEntry ->
             // Get the SAME shared ViewModel from the graph
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry("quiz_flow")
+                navController.getBackStackEntry("quiz_flow/{playerName}")
             }
             val quizViewModel: QuizViewModel = viewModel(parentEntry, factory = AppViewModelProvider.Factory)
 

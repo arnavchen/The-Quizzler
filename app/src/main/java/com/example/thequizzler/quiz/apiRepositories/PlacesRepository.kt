@@ -6,14 +6,19 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.CircularBounds
 import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.android.libraries.places.api.net.SearchNearbyRequest
+import com.google.android.libraries.places.api.net.SearchNearbyResponse
+import com.google.android.libraries.places.api.net.SearchByTextRequest
+import com.google.android.libraries.places.api.net.SearchByTextResponse
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.math.abs
+
 
 /**
  * Minimal, clean data class for a place result. This is what the rest of the app will use,
@@ -51,29 +56,71 @@ class PlacesRepository(private val context: Context) {
     }
 
     /**
-     * Finds the nearest place that matches a given keyword (e.g., "park", "Starbucks").
-     * This is a suspend function, designed to be called from a coroutine.
-     *
-     * @param keyword The term to search for.
-     * @param lat The user's current latitude.
-     * @param lng The user's current longitude.
-     * @return A `PlaceResult` if a match is found, or `null` if no permissions, no network, or no match exists.
+     * Finds the nearest place that matches a specific NAME (e.g., "Starbucks").
+     * This uses a Text Search, which is optimized for name queries.
      */
-    suspend fun findNearestByKeyword(keyword: String, lat: Double, lng: Double): PlaceResult? {
-        // The Places SDK requires location permissions. If not granted, we can't proceed.
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.w("PlacesRepo", "Location permission not granted. Cannot fetch places.")
-            return null
-        }
+    suspend fun findNearestPlaceByFranchiseName(name: String, lat: Double, lng: Double): PlaceResult? {
+        val placeFields = listOf(Place.Field.DISPLAY_NAME, Place.Field.LOCATION)
+        val center = LatLng(lat, lng)
 
-        // Define the specific data fields we want from the API.
-        // This is efficient and reduces data usage.
-        val placeFields = listOf(Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.TYPES)
-        val request = FindCurrentPlaceRequest.newInstance(placeFields)
+        // Build a Text Search request.
+        val request = SearchByTextRequest.builder(name, placeFields)
+            .setLocationRestriction(CircularBounds.newInstance(center, 40000.0)) // About 25 miles
+            .setMaxResultCount(1)
+            .setRankPreference(SearchByTextRequest.RankPreference.DISTANCE)
+            .build()
 
         return try {
-            val response = suspendCancellableCoroutine { continuation ->
-                placesClient.findCurrentPlace(request).addOnCompleteListener { task ->
+            // Call the placesClient.searchByText() method.
+            val response = suspendCancellableCoroutine<SearchByTextResponse> { continuation ->
+                placesClient.searchByText(request).addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(task.result)
+                    } else {
+                        continuation.resumeWithException(task.exception ?: RuntimeException("Unknown Places API error"))
+                    }
+                }
+            }
+            val place = response.places.firstOrNull()
+
+            if(place == null) {
+                return null
+            }
+
+            val distance = FloatArray(1)
+            Location.distanceBetween(lat, lng, place.location!!.latitude, place.location!!.longitude, distance);
+
+            PlaceResult(
+                name = place.displayName!!,
+                latitude = place.location!!.latitude,
+                longitude = place.location!!.longitude,
+                distanceMeters = distance[0].toInt()
+            )
+        } catch (e: Exception) {
+            Log.e("PlacesRepo", "Failed to fetch places from Text Search API.", e)
+            null
+        }
+    }
+
+    /*
+     * Finds the nearest place that matches a given TYPE (e.g., "park", "museum").
+     * This uses a Nearby Search, which is optimized for category queries.
+     */
+    suspend fun findNearestPlaceByType(type: String, lat: Double, lng: Double): PlaceResult? {
+        val placeFields = listOf(Place.Field.DISPLAY_NAME, Place.Field.LOCATION)
+        val center = LatLng(lat, lng)
+
+        // Build a Nearby Search request.
+        val request = SearchNearbyRequest.builder(CircularBounds.newInstance(center, 40000.0), placeFields)
+            .setIncludedTypes(listOf(type))
+            .setMaxResultCount(1)
+            .setRankPreference(SearchNearbyRequest.RankPreference.DISTANCE)
+            .build()
+
+        return try {
+            // Call the placesClient.searchNearby() method.
+            val response = suspendCancellableCoroutine<SearchNearbyResponse> { continuation ->
+                placesClient.searchNearby(request).addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         continuation.resume(task.result)
                     } else {
@@ -82,37 +129,23 @@ class PlacesRepository(private val context: Context) {
                 }
             }
 
-            // Process the list of likely places returned by the API.
-            val bestMatch = response.placeLikelihoods
-                .mapNotNull { placeLikelihood ->
-                    val place = placeLikelihood.place
-                    // Check if the place's name or type matches our keyword.
-                    val nameMatches = place.name?.contains(keyword, ignoreCase = true) ?: false
-                    val typeMatches = place.placeTypes?.any { it.contains(keyword, ignoreCase = true) } ?: false
+            val place = response.places.firstOrNull()
 
-                    if (nameMatches || typeMatches) {
-                        // Calculate the distance from the user to this place.
-                        val distance = FloatArray(1)
-                        Location.distanceBetween(lat, lng, place.latLng!!.latitude, place.latLng!!.longitude, distance)
-                        Pair(place, distance[0]) // Pair the place with its calculated distance.
-                    } else {
-                        null // This place is not a match.
-                    }
-                }
-                .minByOrNull { it.second } // Find the pair with the smallest distance.
-
-            // If a best match was found, convert it to our simple PlaceResult data class.
-            bestMatch?.let { (place, distance) ->
-                PlaceResult(
-                    name = place.name!!,
-                    latitude = place.latLng!!.latitude,
-                    longitude = place.latLng!!.longitude,
-                    distanceMeters = distance.toInt()
-                )
+            if(place == null) {
+                return null
             }
+
+            val distance = FloatArray(1)
+            Location.distanceBetween(lat, lng, place.location!!.latitude, place.location!!.longitude, distance);
+
+            PlaceResult(
+                name = place.displayName!!,
+                latitude = place.location!!.latitude,
+                longitude = place.location!!.longitude,
+                distanceMeters = distance[0].toInt()
+            )
         } catch (e: Exception) {
-            // If anything goes wrong (no network, invalid API key, etc.), log the error and return null.
-            Log.e("PlacesRepo", "Failed to fetch places from API.", e)
+            Log.e("PlacesRepo", "Failed to fetch places from Nearby Search API.", e)
             null
         }
     }

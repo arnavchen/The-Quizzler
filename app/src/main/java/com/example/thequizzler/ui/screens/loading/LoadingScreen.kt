@@ -8,9 +8,11 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -31,6 +33,8 @@ import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 fun LoadingScreen(
     title: String = "The Quizzler",
     message: String? = null,
+    generationFailed: Boolean = false,
+    onReturnHome: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val infiniteTransition = rememberInfiniteTransition()
@@ -57,24 +61,37 @@ fun LoadingScreen(
                 textAlign = TextAlign.Center
             )
 
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.size(AppSpacing.medium))
+            Spacer(modifier = Modifier.size(AppSpacing.medium))
 
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .size(56.dp)
-                    .rotate(angle.value),
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            message?.let {
-                androidx.compose.foundation.layout.Spacer(modifier = Modifier.size(AppSpacing.medium))
+            if (generationFailed) {
                 Text(
-                    text = it,
+                    text = "Sorry, we couldn't generate a full quiz for you at this time. Please try again later.",
                     style = MaterialTheme.typography.bodyLarge,
-                    fontSize = 14.sp,
                     textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.error
                 )
+                Spacer(modifier = Modifier.size(AppSpacing.large))
+                Button(onClick = onReturnHome) {
+                    Text("Return to Home")
+                }
+            } else {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .rotate(angle.value),
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                message?.let {
+                    Spacer(modifier = Modifier.size(AppSpacing.medium))
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
             }
         }
     }

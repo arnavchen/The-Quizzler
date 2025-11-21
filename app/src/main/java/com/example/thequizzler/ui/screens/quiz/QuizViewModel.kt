@@ -22,7 +22,8 @@ import kotlinx.coroutines.launch
 data class QuizUiState(
     val quizManager: QuizManager? = null,
     val isLoading: Boolean = true,
-    val playerName: String = ""
+    val playerName: String = "",
+    val generationFailed: Boolean = false
 )
 
 class QuizViewModel(
@@ -54,12 +55,16 @@ class QuizViewModel(
             )
 
             // Generate questions
-            val generator = QuestionGenerator(settings, questionServices)
-            val questions = generator.generateQuestions(10, location)
+            val generator = QuestionGenerator(settings, questionServices, location)
+            val questions = generator.generateQuestions(10)
 
-            // Create the manager and update the UI state
-            val manager = QuizManager(questions)
-            _uiState.value = QuizUiState(quizManager = manager, isLoading = false, playerName = playerName)
+            if(questions==null) {
+                _uiState.value = _uiState.value.copy(isLoading = false, generationFailed = true)
+            } else {
+                // Create the manager and update the UI state
+                val manager = QuizManager(questions)
+                _uiState.value = QuizUiState(quizManager = manager, isLoading = false, playerName = playerName)
+            }
         }
     }
 

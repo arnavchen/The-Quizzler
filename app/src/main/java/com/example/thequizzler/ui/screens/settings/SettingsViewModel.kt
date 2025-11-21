@@ -27,10 +27,10 @@ class SettingsViewModel(private val settingsRepository: SettingsRepository) : Vi
     // 1. READ the settings from the repository and expose them as StateFlows
     // The UI will "collect" these flows to get the current state.
     override val isLocationEnabled: StateFlow<Boolean> = settingsRepository.isLocationEnabled
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     override val isOfflineMode: StateFlow<Boolean> = settingsRepository.isOfflineMode
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     override val measurementSystem: StateFlow<String> = settingsRepository.measurementSystem
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Met")

@@ -11,6 +11,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.scale
 import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -136,16 +142,32 @@ fun VerticalMockQuizScreen(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.medium),
             modifier = Modifier.fillMaxWidth()
         ) {
+            var selectedAnswer by remember { mutableStateOf<String?>(null) }
+            var selectedIsCorrect by remember { mutableStateOf<Boolean?>(null) }
+
             question.answers.forEach { answerText ->
-                ElevatedButton(
-                    onClick = { onAnswer(answerText) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    Text(answerText, style = MaterialTheme.typography.bodyLarge)
+                val isSelected = selectedAnswer != null && selectedAnswer == answerText
+                val isCorrect = isSelected && (selectedIsCorrect == true)
+
+                AnswerOption(
+                    answerText = answerText,
+                    isSelected = isSelected,
+                    isCorrect = isCorrect,
+                    onClick = { chosen ->
+                        if (selectedAnswer == null) {
+                            selectedAnswer = chosen
+                            selectedIsCorrect = question.checkAnswer(chosen)
+                        }
+                    },
+                    enabled = selectedAnswer == null
+                )
+            }
+
+            // when an answer is selected, submit after a short delay to allow animation
+            LaunchedEffect(selectedAnswer) {
+                if (selectedAnswer != null) {
+                    delay(600L)
+                    onAnswer(selectedAnswer!!)
                 }
             }
         }
@@ -204,20 +226,72 @@ fun HorizontalMockQuizScreen(
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.medium),
                 modifier = Modifier.fillMaxWidth()
             ) {
+                var selectedAnswer by remember { mutableStateOf<String?>(null) }
+                var selectedIsCorrect by remember { mutableStateOf<Boolean?>(null) }
+
                 question.answers.forEach { answerText ->
-                    ElevatedButton(
-                        onClick = { onAnswer(answerText) },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.elevatedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
-                    ) {
-                        Text(answerText, style = MaterialTheme.typography.bodyLarge)
+                    val isSelected = selectedAnswer != null && selectedAnswer == answerText
+                    val isCorrect = isSelected && (selectedIsCorrect == true)
+
+                    AnswerOption(
+                        answerText = answerText,
+                        isSelected = isSelected,
+                        isCorrect = isCorrect,
+                        onClick = { chosen ->
+                            if (selectedAnswer == null) {
+                                selectedAnswer = chosen
+                                selectedIsCorrect = question.checkAnswer(chosen)
+                            }
+                        },
+                        enabled = selectedAnswer == null
+                    )
+                }
+
+                LaunchedEffect(selectedAnswer) {
+                    if (selectedAnswer != null) {
+                        delay(600L)
+                        onAnswer(selectedAnswer!!)
                     }
                 }
             }
         }
+    }
+
+
+@Composable
+private fun AnswerOption(
+    answerText: String,
+    isSelected: Boolean,
+    isCorrect: Boolean,
+    onClick: (String) -> Unit,
+    enabled: Boolean = true
+) {
+    val successColor = Color(0xFF2E7D32)
+    val wrongColor = Color(0xFFB00020)
+    val defaultColor = MaterialTheme.colorScheme.primary
+
+    val targetColor = when {
+        !isSelected -> defaultColor
+        isCorrect -> successColor
+        else -> wrongColor
+    }
+
+    val bgColor by animateColorAsState(targetColor, animationSpec = tween(durationMillis = 300))
+    val scaleTarget = if (isSelected && isCorrect) 1.03f else 1f
+    val scale by animateFloatAsState(targetValue = scaleTarget, animationSpec = tween(250))
+
+    ElevatedButton(
+        onClick = { onClick(answerText) },
+        enabled = enabled,
+        modifier = Modifier
+            .fillMaxWidth()
+            .scale(scale),
+        colors = ButtonDefaults.elevatedButtonColors(
+            containerColor = bgColor,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        )
+    ) {
+        Text(answerText, style = MaterialTheme.typography.bodyLarge)
     }
 }
 

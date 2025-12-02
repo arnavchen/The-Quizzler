@@ -142,8 +142,8 @@ fun VerticalMockQuizScreen(
             verticalArrangement = Arrangement.spacedBy(AppSpacing.medium),
             modifier = Modifier.fillMaxWidth()
         ) {
-            var selectedAnswer by remember { mutableStateOf<String?>(null) }
-            var selectedIsCorrect by remember { mutableStateOf<Boolean?>(null) }
+            var selectedAnswer by remember(question) { mutableStateOf<String?>(null) }
+            var selectedIsCorrect by remember(question) { mutableStateOf<Boolean?>(null) }
 
             question.answers.forEach { answerText ->
                 val isSelected = selectedAnswer != null && selectedAnswer == answerText
@@ -256,6 +256,8 @@ fun HorizontalMockQuizScreen(
             }
         }
     }
+
+}
 
 
 @Composable

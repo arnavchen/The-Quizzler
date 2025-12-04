@@ -2,7 +2,7 @@ package com.example.thequizzler.ui.screens.sessioninfo
 
 import android.content.res.Configuration
 import android.util.Log
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -11,6 +11,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,7 +33,6 @@ import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.text.format
 
 @Composable
 fun SessionInfoScreen(navController: NavController, sessionId: String? = null) {
@@ -65,51 +66,22 @@ fun VerticalSessionInfo(session: Session, questions: List<QuestionInstance>, nav
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        // Top Row: Back button + player info
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+        SessionHeader(session, navController)
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                Column(modifier = Modifier.padding(start = 8.dp)) {
-                    Text(session.userName, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                    Text(
-                        SimpleDateFormat("M/d/yyyy, h:mm a", Locale.getDefault()).format(Date(session.startTime)),
-                        fontSize = 14.sp, color = Color.Gray
-                    )
-                }
+            questions.forEach { question ->
+                QuestionCard(question = question, onClick = {})
+                Spacer(modifier = Modifier.height(12.dp))
             }
-
-            // Score in top right
-            Text(
-                text = "Score: ${session.score}",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Question cards
-        questions.forEach { question ->
-            QuestionCard(question = question, onClick = {
-                // navigate to detail later
-                // navController.navigate("questionDetail/${question.id}")
-            })
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -117,60 +89,109 @@ fun VerticalSessionInfo(session: Session, questions: List<QuestionInstance>, nav
 @Composable
 fun HorizontalSessionInfo(session: Session, questions: List<QuestionInstance>, navController: NavController) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
-        // Top bar
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                Column(modifier = Modifier.padding(start = 8.dp)) {
-                    Text(session.userName, fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                    Text(
-                        SimpleDateFormat("M/d/yyyy, h:mm a", Locale.getDefault()).format(Date(session.startTime)),
-                        fontSize = 14.sp, color = Color.Gray
-                    )
-                }
-            }
-
-            // Score in top right
-            Text(
-                text = "Score: ${session.score}",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
+        SessionHeader(session, navController, modifier = Modifier.padding(16.dp))
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Horizontal scroll row of question cards
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
+                .fillMaxHeight()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             questions.forEach { question ->
                 QuestionCard(
                     question = question,
-                    onClick = { /* Navigate to detailed question later */ },
-                    modifier = Modifier.width(220.dp)
+                    onClick = {},
+                    modifier = Modifier.width(280.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun SessionHeader(
+    session: Session,
+    navController: NavController,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Back button
+        IconButton(
+            onClick = { navController.popBackStack() },
+            modifier = Modifier
+                .size(44.dp)
+                .align(Alignment.Start)
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
+        // Player info and score row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    session.userName,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    SimpleDateFormat("M/d/yyyy, h:mm a", Locale.getDefault()).format(Date(session.startTime)),
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Score display
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    "${session.score}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 32.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    "Score",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
+
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            color = MaterialTheme.colorScheme.outlineVariant
+        )
     }
 }
 
@@ -180,50 +201,94 @@ fun QuestionCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isCorrect = question.userResponse.equals(question.correctResponse, ignoreCase = true)
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        border = androidx.compose.foundation.BorderStroke(
+            2.dp,
+            if (isCorrect) Color(0xFF4CAF50) else Color(0xFFf44336)
+        )
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp),
-            horizontalAlignment = Alignment.Start
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = question.question,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-
+            // Header with status indicator
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(horizontalAlignment = Alignment.Start) {
-                    Text("You said:", fontWeight = FontWeight.Medium)
-                    Box(
-                        modifier = Modifier
-                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                            .padding(6.dp)
-                    ) {
-                        Text(question.userResponse)
-                    }
-                }
-                Column(horizontalAlignment = Alignment.Start) {
-                    Text("Correct Answer:", fontWeight = FontWeight.Medium)
-                    Box(
-                        modifier = Modifier
-                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                            .padding(6.dp)
-                    ) {
-                        Text(question.correctResponse)
-                    }
-                }
+                Text(
+                    text = question.question,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Icon(
+                    imageVector = if (isCorrect) Icons.Filled.Check else Icons.Filled.Close,
+                    contentDescription = if (isCorrect) "Correct" else "Incorrect",
+                    tint = if (isCorrect) Color(0xFF4CAF50) else Color(0xFFf44336),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // User's response
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        RoundedCornerShape(8.dp)
+                    )
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    "Your Answer:",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    question.userResponse,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            // Correct answer
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        Color(0xFF4CAF50).copy(alpha = 0.15f),
+                        RoundedCornerShape(8.dp)
+                    )
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    "Correct Answer:",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 12.sp,
+                    color = Color(0xFF2E7D32)
+                )
+                Text(
+                    question.correctResponse,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF1B5E20)
+                )
             }
         }
     }

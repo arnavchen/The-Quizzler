@@ -1,6 +1,11 @@
 package com.example.thequizzler.ui.components
 
 import android.util.Log
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Leaderboard
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ViewAgenda
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -33,28 +38,35 @@ fun BottomNavBar(navController: NavHostController) {
 
     NavigationBar {
         items.forEach { screen ->
+            val icon = when (screen) {
+                Screen.Home -> Icons.Filled.Home
+                Screen.Leaderboard -> Icons.Filled.Leaderboard
+                Screen.Sessions -> Icons.Filled.ViewAgenda
+                Screen.Settings -> Icons.Filled.Settings
+                else -> Icons.Filled.Home
+            }
+            val label = when (screen) {
+                Screen.Home -> "Home"
+                Screen.Leaderboard -> "Leaderboard"
+                Screen.Sessions -> "Sessions"
+                Screen.Settings -> "Settings"
+                else -> screen.route
+            }
             NavigationBarItem(
                 selected = currentRoute == screen.route,
                 onClick = {
                     navController.navigate(screen.route) {
-                        // Pop up to the start destination of the graph to
-                        // avoid building up a large back stack of destinations
-                        // on the back button as users select items.
                         popUpTo(navController.graph.startDestinationId) {
                             saveState = true
                         }
-                        // Avoid multiple copies of the same destination when
-                        // re-selecting the same item
                         launchSingleTop = true
-                        // Restore state when re-selecting a previously selected item
                         restoreState = true
                     }
                 },
-                label = { Text(screen.route.substring(0, 1).uppercase()) },
-                icon = { /* Icons later */ }
+                label = { Text(label) },
+                icon = { Icon(imageVector = icon, contentDescription = label) }
             )
         }
     }
-// ...
 
 }

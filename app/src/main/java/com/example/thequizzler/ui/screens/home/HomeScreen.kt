@@ -1,21 +1,16 @@
 package com.example.thequizzler.ui.screens.home
 
 import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,84 +25,67 @@ import java.net.URLEncoder
 @Composable
 fun HomeScreen(navController: NavController, modifier: Modifier = Modifier) {
 
-    LaunchedEffect(Unit) {
-        Log.d("Lifecycle", "HomeScreen Composable CREATED")
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            Log.d("Lifecycle", "HomeScreen Composable DISPOSED")
-        }
-    }
+    LaunchedEffect(Unit) { Log.d("Lifecycle", "HomeScreen CREATED") }
+    DisposableEffect(Unit) { onDispose { Log.d("Lifecycle", "HomeScreen DISPOSED") } }
 
     val configuration = LocalConfiguration.current
-    val orientation = configuration.orientation
+    val isLandscape = configuration.orientation ==
+            android.content.res.Configuration.ORIENTATION_LANDSCAPE
 
     val model: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
-    if (orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
-        HorizontalHomeScreen(
-            navController = navController,
-            name = model.playerName,
-            onNameChange = { model.onNameChange(it) },
+    HomeScreenLayout(
+        navController = navController,
+        name = model.playerName,
+        onNameChange = model::onNameChange,
+        isLandscape = isLandscape,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun HomeScreenLayout(
+    navController: NavController,
+    name: String,
+    onNameChange: (String) -> Unit,
+    isLandscape: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val scrollState = rememberScrollState()
+
+    if (isLandscape) {
+        Row(
             modifier = modifier
-        )
+                .fillMaxSize()
+                .padding(24.dp)
+                .verticalScroll(scrollState),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                QuizzlerTitle()
+                NameField(
+                    name = name,
+                    onNameChange = onNameChange,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+                PlayButton(
+                    navController = navController,
+                    name = name,
+                    modifier = Modifier.padding(top = 24.dp)
+                )
+            }
+        }
     } else {
-        VerticalHomeScreen(
-            navController = navController,
-            name = model.playerName,
-            onNameChange = { model.onNameChange(it) },
-            modifier = modifier
-        )
-    }
-}
-
-@Composable
-fun VerticalHomeScreen(navController: NavController, name: String, onNameChange: (String) -> Unit, modifier: Modifier = Modifier) {
-
-    LaunchedEffect(Unit) {
-        Log.d("Lifecycle", "VerticalHomeScreen Composable CREATED")
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            Log.d("Lifecycle", "VerticalHomeScreen Composable DISPOSED")
-        }
-    }
-
-    Column(
-        modifier = modifier.padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        QuizzlerTitle()
-        NameField(
-            name = name,
-            onNameChange = onNameChange,
-            modifier = Modifier.padding(top = 16.dp)
-        )
-        PlayButton(navController = navController, name = name)
-    }
-}
-
-@Composable
-fun HorizontalHomeScreen(navController: NavController, name: String, onNameChange: (String) -> Unit, modifier: Modifier = Modifier) {
-    LaunchedEffect(Unit) {
-        Log.d("Lifecycle", "HorizontalHomeScreen Composable CREATED")
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            Log.d("Lifecycle", "HorizontalHomeScreen Composable DISPOSED")
-        }
-    }
-
-    androidx.compose.foundation.layout.Row(
-        modifier = modifier.padding(24.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
         Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(24.dp)
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -115,79 +93,73 @@ fun HorizontalHomeScreen(navController: NavController, name: String, onNameChang
             NameField(
                 name = name,
                 onNameChange = onNameChange,
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier.padding(top = 32.dp)
             )
-            PlayButton(navController = navController, name = name)
+            PlayButton(
+                navController = navController,
+                name = name,
+                modifier = Modifier.padding(top = 32.dp)
+            )
         }
     }
 }
 
 @Composable
 fun NameField(name: String, onNameChange: (String) -> Unit, modifier: Modifier = Modifier) {
-
-    LaunchedEffect(Unit) {
-        Log.d("Lifecycle", "NameField Composable CREATED")
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            Log.d("Lifecycle", "NameField Composable DISPOSED")
-        }
-    }
-
     OutlinedTextField(
         value = name,
         onValueChange = onNameChange,
         label = { Text("Enter your name") },
-        modifier = modifier
+        modifier = modifier.fillMaxWidth(0.8f),
+        shape = RoundedCornerShape(12.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+        )
     )
 }
-
 
 @Composable
 fun QuizzlerTitle() {
-    LaunchedEffect(Unit) {
-        Log.d("Lifecycle", "QuizzlerTitle Composable CREATED")
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            Log.d("Lifecycle", "QuizzlerTitle Composable DISPOSED")
-        }
-    }
-
     Text(
         text = "The Quizzler",
-        fontSize = 24.sp,
+        fontSize = 48.sp,
+        fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.primary
     )
 }
 
-
 @Composable
-fun PlayButton(navController: NavController, name: String) {
-    LaunchedEffect(Unit) {
-        Log.d("Lifecycle", "PlayButton Composable CREATED")
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            Log.d("Lifecycle", "PlayButton Composable DISPOSED")
-        }
-    }
-
-    Button(onClick = {
-        val player = URLEncoder.encode(name.ifEmpty { "Player" }, "UTF-8")
-        navController.navigate("quiz_flow/$player")
-    }) {
-        Text("Play")
+fun PlayButton(navController: NavController, name: String, modifier: Modifier = Modifier) {
+    Button(
+        onClick = {
+            val player = URLEncoder.encode(name.ifEmpty { "Player" }, "UTF-8")
+            navController.navigate("quiz_flow/$player")
+        },
+        modifier = modifier
+            .fillMaxWidth(0.6f)
+            .padding(horizontal = 32.dp),
+        colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Text(
+            text = "Play",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
-fun HomeScreenPreview() {
-    TheQuizzlerTheme {
-        HomeScreen(navController = rememberNavController())
-    }
+fun PreviewHomePortrait() {
+    TheQuizzlerTheme { HomeScreen(navController = rememberNavController()) }
+}
+
+@Preview(showBackground = true, widthDp = 800, heightDp = 360)
+@Composable
+fun PreviewHomeLandscape() {
+    TheQuizzlerTheme { HomeScreen(navController = rememberNavController()) }
 }

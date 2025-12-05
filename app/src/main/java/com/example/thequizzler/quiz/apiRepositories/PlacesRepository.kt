@@ -87,7 +87,7 @@ class PlacesRepository(private val context: Context) {
             val place = response.places.firstOrNull()
 
             if(place == null) {
-                return null
+                throw Exception("Place of name " + name + " not found");
             }
 
             val distance = FloatArray(1)

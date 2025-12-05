@@ -16,6 +16,8 @@ object WhichCameFirstTemplate : IQuestionTemplate {
     // This template has no requirements, so it can run in any mode.
     override val requirements: Set<TemplateRequirement> = emptySet()
 
+    override val weight = 1;
+
     private val events = OfflineData.historicalEvents
 
     override suspend fun generate(

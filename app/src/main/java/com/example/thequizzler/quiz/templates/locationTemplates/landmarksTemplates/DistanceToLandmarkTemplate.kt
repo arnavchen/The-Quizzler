@@ -14,6 +14,8 @@ object DistanceToLandmarkTemplate : IQuestionTemplate {
     // Requires location, but NOT internet.
     override val requirements = setOf(TemplateRequirement.LOCATION)
 
+    override val weight = 1;
+
     private val landmarks = LandmarksData.landmarks
 
     override suspend fun generate(services: QuestionServices, location: SimpleLocation?, settings: QuizSettings): GeneratedQuestion? {

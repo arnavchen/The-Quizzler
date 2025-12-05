@@ -201,7 +201,7 @@ object PlacesKeywords {
         "Clothing Store" to "clothing_store",
         "Convenience Store" to "convenience_store",
         "Department Store" to "department_store",
-        "Grocery Store" to "grocery_or_supermarket",
+        "Grocery Store" to "grocery_store",
         "Home Improvement Store" to "home_goods_store",
         "Shoe Store" to "shoe_store",
         "Sporting Goods Store" to "sporting_goods_store",

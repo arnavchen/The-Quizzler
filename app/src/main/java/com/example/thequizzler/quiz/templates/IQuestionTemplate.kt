@@ -24,6 +24,12 @@ interface IQuestionTemplate {
     val requirements: Set<TemplateRequirement>
 
     /**
+     * An integer that determines how often a question will appear
+     * 1 for low priority, two for regular priority, 3 for high priority
+     */
+    val weight: Int
+
+    /**
      * Generates a single question instance.
      * @param services A container for dependencies like the Places API repository.
      * @param settings The quiz settings (e.g., measurement system) to tailor generation.

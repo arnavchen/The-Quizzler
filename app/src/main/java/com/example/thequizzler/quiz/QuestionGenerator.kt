@@ -29,7 +29,11 @@ class QuestionGenerator(
             return null;
         }
 
-        val questions = mutableSetOf<GeneratedQuestion>()
+        val weightedTemplates = availableTemplates.flatMap { template ->
+            List(template.weight) { template }
+        }
+
+            val questions = mutableSetOf<GeneratedQuestion>()
         val maxAttempts = count * 5 // Safety break to prevent infinite loops
 
         for (i in 0 until maxAttempts) {
@@ -37,7 +41,7 @@ class QuestionGenerator(
             if (questions.size >= count) break
 
             // Generate one question at a time.
-            val newQuestion = availableTemplates.random().generate(services, location, settings)
+            val newQuestion = weightedTemplates.random().generate(services, location, settings)
             if (newQuestion != null) {
                 // Add the question to a set to automatically handle distinctness.
                 questions.add(newQuestion)

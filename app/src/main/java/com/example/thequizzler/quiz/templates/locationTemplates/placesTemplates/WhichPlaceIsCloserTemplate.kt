@@ -17,6 +17,8 @@ object WhichPlaceIsCloserTemplate : IQuestionTemplate {
 
     override val requirements = setOf(TemplateRequirement.LOCATION, TemplateRequirement.INTERNET)
 
+    override val weight = 3;
+
     private val franchises = PlacesKeywords.franchises
     private val placeTypes = PlacesKeywords.placeTypes
 

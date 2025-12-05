@@ -14,6 +14,8 @@ object DistanceToNearestPlaceTemplate : IQuestionTemplate {
 
     override val requirements = setOf(TemplateRequirement.LOCATION, TemplateRequirement.INTERNET)
 
+    override val weight = 3;
+
     // Keywords are stored here
     private val franchises = PlacesKeywords.franchises
     private val placeTypes = PlacesKeywords.placeTypes

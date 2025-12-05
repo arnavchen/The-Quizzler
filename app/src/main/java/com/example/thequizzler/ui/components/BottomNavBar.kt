@@ -1,6 +1,9 @@
 package com.example.thequizzler.ui.components
 
 import android.util.Log
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Leaderboard
@@ -10,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.thequizzler.navigation.Screen
@@ -36,7 +40,11 @@ fun BottomNavBar(navController: NavHostController) {
     val navBackStackEntry = navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry.value?.destination?.route
 
-    NavigationBar {
+    NavigationBar(
+        modifier = Modifier.semantics {
+            contentDescription = "Main navigation bar"
+        }
+    ) {
         items.forEach { screen ->
             val icon = when (screen) {
                 Screen.Home -> Icons.Filled.Home
@@ -52,8 +60,10 @@ fun BottomNavBar(navController: NavHostController) {
                 Screen.Settings -> "Settings"
                 else -> screen.route
             }
+            val isSelected = currentRoute == screen.route
+
             NavigationBarItem(
-                selected = currentRoute == screen.route,
+                selected = isSelected,
                 onClick = {
                     navController.navigate(screen.route) {
                         popUpTo(navController.graph.startDestinationId) {
@@ -64,7 +74,16 @@ fun BottomNavBar(navController: NavHostController) {
                     }
                 },
                 label = { Text(label) },
-                icon = { Icon(imageVector = icon, contentDescription = label) }
+                icon = {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null
+                    )
+                },
+                modifier = Modifier.semantics {
+                    contentDescription = "$label tab"
+                    stateDescription = if (isSelected) "Selected" else "Not selected"
+                }
             )
         }
     }

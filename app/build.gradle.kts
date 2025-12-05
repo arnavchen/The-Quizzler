@@ -70,7 +70,6 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(platform(libs.kotlin.bom))
     implementation(libs.google.places)
-    implementation(libs.google.places)
     implementation(libs.accompanist.permissions)
     ksp(libs.androidx.room.compiler)
     ksp(libs.androidx.room.compiler)

@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import com.example.thequizzler.navigation.Screen
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
@@ -94,7 +95,10 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
         ) {
             Button(
                 onClick = { navController.navigate(Screen.Home.route) {
-                    popUpTo(navController.graph.startDestinationId)
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
                 } },
                 modifier = Modifier.size(width = 120.dp, height = 80.dp)
             ) {
@@ -104,7 +108,12 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
             }
 
             Button(
-                onClick = { navController.navigate(Screen.Leaderboard.route) },
+                onClick = { navController.navigate(Screen.Leaderboard.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                } },
                 modifier = Modifier.size(width = 120.dp, height = 80.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -153,7 +162,10 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
         ) {
             Button(
                 onClick = { navController.navigate(Screen.Home.route) {
-                    popUpTo(navController.graph.startDestinationId)
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
                 } },
                 modifier = Modifier.size(width = 120.dp, height = 80.dp)
             ) {
@@ -163,7 +175,12 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
             }
 
             Button(
-                onClick = { navController.navigate(Screen.Leaderboard.route) },
+                onClick = { navController.navigate(Screen.Leaderboard.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                } },
                 modifier = Modifier.size(width = 120.dp, height = 80.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {

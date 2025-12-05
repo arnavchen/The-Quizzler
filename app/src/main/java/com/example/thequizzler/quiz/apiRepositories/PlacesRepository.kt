@@ -10,6 +10,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.CircularBounds
 import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.RectangularBounds
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.api.net.SearchNearbyRequest
 import com.google.android.libraries.places.api.net.SearchNearbyResponse
@@ -62,10 +63,12 @@ class PlacesRepository(private val context: Context) {
     suspend fun findNearestPlaceByFranchiseName(name: String, lat: Double, lng: Double): PlaceResult? {
         val placeFields = listOf(Place.Field.DISPLAY_NAME, Place.Field.LOCATION)
         val center = LatLng(lat, lng)
+        val radiusMeters = 40000.0; // About 25 miles
+        val bounds = toRectangularBounds(center, radiusMeters)
 
         // Build a Text Search request.
         val request = SearchByTextRequest.builder(name, placeFields)
-            .setLocationRestriction(CircularBounds.newInstance(center, 40000.0)) // About 25 miles
+            .setLocationRestriction(bounds)
             .setMaxResultCount(1)
             .setRankPreference(SearchByTextRequest.RankPreference.DISTANCE)
             .build()
@@ -145,8 +148,25 @@ class PlacesRepository(private val context: Context) {
                 distanceMeters = distance[0].toInt()
             )
         } catch (e: Exception) {
-            Log.e("PlacesRepo", "Failed to fetch places from Nearby Search API.", e)
+            Log.e(
+                "PlacesRepo",
+                "Nearby Search API failed with message: ${e.message}",
+                e
+            )
             null
         }
     }
+}
+
+/**
+ * Helper function to convert a center point and a radius into a RectangularBounds object.
+ */
+private fun toRectangularBounds(center: LatLng, radiusInMeters: Double): RectangularBounds {
+    val earthRadius = 6371000.0 // meters
+    val latDelta = Math.toDegrees(radiusInMeters / earthRadius)
+    val lonDelta = Math.toDegrees(radiusInMeters / (earthRadius * Math.cos(Math.toRadians(center.latitude))))
+
+    val southWest = LatLng(center.latitude - latDelta, center.longitude - lonDelta)
+    val northEast = LatLng(center.latitude + latDelta, center.longitude + lonDelta)
+    return RectangularBounds.newInstance(southWest, northEast)
 }

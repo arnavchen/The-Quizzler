@@ -4,14 +4,6 @@ import android.location.Location
 import com.example.thequizzler.quiz.apiRepositories.PlacesRepository
 
 /**
- * A provider for location services. This can be a real GPS implementation
- * or a mock one for testing.
- */
-interface LocationProvider {
-    fun getLastKnownLocation(): Location?
-}
-
-/**
  * A service locator that holds API repositories and the state for the
  * current question generation session.
  *

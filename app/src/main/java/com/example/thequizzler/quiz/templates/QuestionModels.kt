@@ -23,8 +23,3 @@ data class QuestionGenerationContext(
     val location: SimpleLocation?,
     val services: QuestionServices
 )
-
-// how long to send email from current location to _____
-// many non-api questions will be generated using key value pairs
-//        e.g. average animal generation -> days, historical event -> data
-//

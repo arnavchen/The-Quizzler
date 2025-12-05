@@ -1,16 +1,16 @@
-package com.example.thequizzler.quiz.templates.locationBased
+package com.example.thequizzler.quiz.templates.locationTemplates.placesTemplates
 
 import android.util.Log
 import com.example.thequizzler.quiz.GeneratedQuestion
-import com.example.thequizzler.quiz.QuizSettings
 import com.example.thequizzler.quiz.QuestionServices
+import com.example.thequizzler.quiz.QuizSettings
 import com.example.thequizzler.quiz.apiRepositories.PlaceResult
 import com.example.thequizzler.quiz.templates.IQuestionTemplate
 import com.example.thequizzler.quiz.templates.SimpleLocation
 import com.example.thequizzler.quiz.templates.TemplateRequirement
 import kotlin.random.Random
 
-object DistanceToNearestTemplate : IQuestionTemplate {
+object DistanceToNearestPlaceTemplate : IQuestionTemplate {
 
     override val requirements = setOf(TemplateRequirement.LOCATION, TemplateRequirement.INTERNET)
 
@@ -33,9 +33,11 @@ object DistanceToNearestTemplate : IQuestionTemplate {
             Log.d("TemplateDebug", "Searching by NAME: $chosenKeyword")
             nearest = services.placesRepository.findNearestPlaceByFranchiseName(chosenKeyword, location.latitude, location.longitude)
         } else {
-            chosenKeyword = placeTypes.random()
-            Log.d("TemplateDebug", "Searching by TYPE: $chosenKeyword")
-            nearest = services.placesRepository.findNearestPlaceByType(chosenKeyword, location.latitude, location.longitude)
+
+            val (prettyName, apiType) = placeTypes.entries.random()
+            chosenKeyword = prettyName
+            Log.d("TemplateDebug", "Searching by TYPE: $apiType")
+            nearest = services.placesRepository.findNearestPlaceByType(apiType, location.latitude, location.longitude)
         }
 
         Log.d("Place chosen", chosenKeyword);
@@ -74,7 +76,7 @@ object DistanceToNearestTemplate : IQuestionTemplate {
                 false -> rnd.nextDouble(deadZoneUpperBound, upperLimit) // Values larger than the correct answer
             }
 
-            val distractorValue = (correctDistance * randomFactor).toInt().coerceAtLeast(10)
+            val distractorValue = (correctDistance * randomFactor).toInt()
 
             distractors.add(formatDistance(distractorValue, isImperial))
         }

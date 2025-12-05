@@ -26,7 +26,7 @@ class QuestionGenerator(
         }
 
         if (availableTemplates.isEmpty()) {
-            return emptyList() // No templates available for this mode
+            return null;
         }
 
         val questions = mutableSetOf<GeneratedQuestion>()

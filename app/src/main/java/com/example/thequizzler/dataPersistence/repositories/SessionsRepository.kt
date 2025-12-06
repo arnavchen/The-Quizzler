@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
  *
  * @param sessionDao The Data Access Object for Session data.
  */
-class SessionsRepository(
+open class SessionsRepository(
     private val sessionDao: SessionDao,
 ) {
 

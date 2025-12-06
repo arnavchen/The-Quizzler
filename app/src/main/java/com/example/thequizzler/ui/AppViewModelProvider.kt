@@ -17,7 +17,7 @@ import com.example.thequizzler.ui.screens.settings.SettingsViewModel
  * Provides a Factory to create instances of ViewModels.
  */
 object AppViewModelProvider {
-    val Factory = viewModelFactory {
+    var Factory = viewModelFactory {
         // Initializer for HomeViewModel
         initializer {
             HomeViewModel(

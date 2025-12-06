@@ -27,7 +27,7 @@ import com.example.thequizzler.ui.AppViewModelProvider
 import com.example.thequizzler.ui.screens.home.HomeScreen
 import com.example.thequizzler.ui.screens.leaderboard.LeaderboardScreen
 import com.example.thequizzler.ui.screens.loading.LoadingScreen
-import com.example.thequizzler.ui.screens.quiz.MockQuizScreen
+import com.example.thequizzler.ui.screens.quiz.QuizScreen
 import com.example.thequizzler.ui.screens.quiz.QuizViewModel
 import com.example.thequizzler.ui.screens.quiz.ResultsScreen
 import com.example.thequizzler.ui.screens.sessioninfo.SessionInfoScreen
@@ -149,7 +149,7 @@ private fun NavGraphBuilder.quizGraph(navController: NavHostController) {
             }
             val quizViewModel: QuizViewModel = viewModel(parentEntry, factory = AppViewModelProvider.Factory)
 
-            MockQuizScreen(
+            QuizScreen(
                 navController = navController,
                 quizViewModel = quizViewModel
             )

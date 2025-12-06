@@ -6,6 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -63,25 +66,17 @@ fun SessionInfoScreen(navController: NavController, sessionId: String? = null) {
 
 @Composable
 fun VerticalSessionInfo(session: Session, questions: List<QuestionInstance>, navController: NavController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+    LazyColumn(
+        modifier = Modifier.fillMaxSize() ,
+        contentPadding = PaddingValues(bottom = 16.dp)
     ) {
-        SessionHeader(session, navController)
+        item {
+            SessionHeader(session, navController)
+        }
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        ) {
-            questions.forEach { question ->
-                QuestionCard(question = question, onClick = {})
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+        items(questions) { question ->
+            QuestionCard(question = question, onClick = {}, modifier = Modifier.padding(horizontal = 16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }
@@ -95,23 +90,23 @@ fun HorizontalSessionInfo(session: Session, questions: List<QuestionInstance>, n
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
+        LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
-                .horizontalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 8.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            questions.forEach { question ->
+
+            items(questions) { question ->
                 QuestionCard(
                     question = question,
                     onClick = {},
                     modifier = Modifier.width(280.dp)
                 )
             }
-            Spacer(modifier = Modifier.width(8.dp))
-        }
+            }
     }
 }
 

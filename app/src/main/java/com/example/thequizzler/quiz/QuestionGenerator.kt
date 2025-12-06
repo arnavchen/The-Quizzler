@@ -33,28 +33,36 @@ class QuestionGenerator(
             List(template.weight) { template }
         }
 
-            val questions = mutableSetOf<GeneratedQuestion>()
-        val maxAttempts = count * 5 // Safety break to prevent infinite loops
+        return coroutineScope {
+            // Launch [count] concurrent jobs, one for each question needed.
+            val questionJobs = (1..count).map {
+                async {
+                    // Each thread tries to generate a question 5 times before returning null
+                    var generatedQuestion: GeneratedQuestion? = null
+                    for (attempt in 1..5) {
+                        val candidate = weightedTemplates.random().generate(services, location, settings)
+                        if (candidate != null) {
+                            generatedQuestion = candidate
+                            break // Successfully generated, break the inner loop.
+                        }
+                    }
+                    generatedQuestion // Return the result (or null if all attempts failed).
+                }
+            }
 
-        for (i in 0 until maxAttempts) {
-            // If we have enough questions, stop trying to generate more.
-            if (questions.size >= count) break
+            // Wait for all threads to complete.
+            val results = questionJobs.awaitAll()
 
-            // Generate one question at a time.
-            val newQuestion = weightedTemplates.random().generate(services, location, settings)
-            if (newQuestion != null) {
-                // Add the question to a set to automatically handle distinctness.
-                questions.add(newQuestion)
+            // Filter out any nulls and ensure distinctness.
+            val successfulQuestions = results.filterNotNull().distinct()
+
+            // Check if [count] questions were successfully generated. If not, return null
+            if (successfulQuestions.size < count) {
+                null
+            } else {
+                successfulQuestions
             }
         }
-
-        // If, after all attempts, we still don't have enough questions, consider it a failure.
-        if (questions.size < count) {
-            return null
-        }
-
-        // Return a distinct list to avoid duplicate questions if the pool is small
-        return questions.take(count)
     }
 }
 

@@ -7,6 +7,9 @@ import com.example.thequizzler.quiz.QuizSettings
 import com.example.thequizzler.quiz.templates.IQuestionTemplate
 import com.example.thequizzler.quiz.templates.SimpleLocation
 import com.example.thequizzler.quiz.templates.TemplateRequirement
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.pow
 import kotlin.random.Random
 
 object DistanceToLandmarkTemplate : IQuestionTemplate {
@@ -66,14 +69,45 @@ object DistanceToLandmarkTemplate : IQuestionTemplate {
     }
 
     private fun formatDistance(meters: Int, isImperial: Boolean): String {
-        if (isImperial) {
-            val metersPerMile = 1609.344
-            val miles = meters / metersPerMile
-            // For large distances, don't show feet.
-            return String.format("%.0f mi", miles)
+        return if (isImperial) {
+            val miles = meters / 1609.344
+            if (miles < 0.2) { // Use feet for short distances (approx. < 1000 ft)
+                val feet = meters * 3.28084
+                "${formatToTwoSignificantFigures(feet)} ft"
+            } else { // Use miles for longer distances
+                "${formatToTwoSignificantFigures(miles)} mi"
+            }
+        } else { // Metric
+            if (meters < 1000) {
+                // Use meters for short distances
+                "${formatToTwoSignificantFigures(meters.toDouble())} m"
+            } else { // Use kilometers for longer distances
+                val kilometers = meters / 1000.0
+                "${formatToTwoSignificantFigures(kilometers)} km"
+            }
+        }
+    }
+
+    private fun formatToTwoSignificantFigures(value: Double): String {
+        if (value == 0.0) return "0"
+
+        if (value < 1.0) {
+            val magnitude = floor(log10(value)).toInt()
+            val decimals = 1 - magnitude
+
+            return String.format("%,.${decimals}f", value)
+        }
+
+        val magnitude = floor(log10(value))
+        val scale = 10.0.pow(magnitude - 1)
+
+        val roundedValue = kotlin.math.round(value / scale) * scale
+
+        val showAsInteger = roundedValue >= 10 || roundedValue % 1.0 == 0.0
+        return if (showAsInteger) {
+            String.format("%,.0f", roundedValue)
         } else {
-            val kilometers = meters / 1000.0
-            return String.format("%.0f km", kilometers)
+            String.format("%,.1f", roundedValue)
         }
     }
 }

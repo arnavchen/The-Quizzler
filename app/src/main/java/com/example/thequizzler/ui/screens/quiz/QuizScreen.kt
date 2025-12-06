@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.graphics.Color
@@ -28,12 +27,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.thequizzler.quiz.GeneratedQuestion
 import com.example.thequizzler.navigation.Screen
-import com.example.thequizzler.ui.screens.loading.LoadingHost
 import com.example.thequizzler.ui.theme.TheQuizzlerTheme
 import com.example.thequizzler.ui.theme.AppSpacing
 
 @Composable
-fun MockQuizScreen(navController: NavController, quizViewModel: QuizViewModel) {
+fun QuizScreen(navController: NavController, quizViewModel: QuizViewModel) {
 
     LaunchedEffect(Unit) {
         Log.d("Lifecycle", "MockQuizScreen Composable CREATED");
@@ -53,18 +51,6 @@ fun MockQuizScreen(navController: NavController, quizViewModel: QuizViewModel) {
         var timeLeftMs by remember { mutableStateOf(currentQuestion.timeLimitSeconds * 1000L) }
         val startTime by remember(quizManager.currentQuestionIndex) { mutableStateOf(System.currentTimeMillis()) }
 
-        LaunchedEffect(quizManager.currentQuestionIndex) {
-            timeLeftMs = currentQuestion.timeLimitSeconds * 1000L
-            val questionStartTime = System.currentTimeMillis()
-            while (true) {
-                val elapsed = System.currentTimeMillis() - questionStartTime
-                val remaining = (currentQuestion.timeLimitSeconds * 1000L) - elapsed
-                timeLeftMs = if (remaining > 0) remaining else 0L
-                if (timeLeftMs <= 0L) break
-                delay(50L)
-            }
-        }
-
         val onAnswerSelected: (String) -> Unit = { userAnswer ->
             val timeTaken = System.currentTimeMillis() - startTime
             quizManager.submitAnswer(userAnswer, timeTaken)
@@ -73,8 +59,23 @@ fun MockQuizScreen(navController: NavController, quizViewModel: QuizViewModel) {
             }
         }
 
+        LaunchedEffect(quizManager.currentQuestionIndex) {
+            timeLeftMs = currentQuestion.timeLimitSeconds * 1000L
+            val questionStartTime = System.currentTimeMillis()
+            while (true) {
+                val elapsed = System.currentTimeMillis() - questionStartTime
+                val remaining = (currentQuestion.timeLimitSeconds * 1000L) - elapsed
+                timeLeftMs = if (remaining > 0) remaining else 0L
+                if (timeLeftMs <= 0L) {
+                    onAnswerSelected("")
+                    break
+                }
+                delay(50L)
+            }
+        }
+
         if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            HorizontalMockQuizScreen(
+            HorizontalQuizScreen(
                 question = currentQuestion,
                 questionNumber = quizManager.currentQuestionIndex + 1,
                 totalQuestions = quizManager.totalQuestions,
@@ -83,7 +84,7 @@ fun MockQuizScreen(navController: NavController, quizViewModel: QuizViewModel) {
                 onAnswer = onAnswerSelected
             )
         } else {
-            VerticalMockQuizScreen(
+            VerticalQuizScreen(
                 question = currentQuestion,
                 questionNumber = quizManager.currentQuestionIndex + 1,
                 totalQuestions = quizManager.totalQuestions,
@@ -96,7 +97,7 @@ fun MockQuizScreen(navController: NavController, quizViewModel: QuizViewModel) {
 }
 
 @Composable
-fun VerticalMockQuizScreen(
+fun VerticalQuizScreen(
     question: GeneratedQuestion,
     questionNumber: Int,
     totalQuestions: Int,
@@ -175,7 +176,7 @@ fun VerticalMockQuizScreen(
 }
 
 @Composable
-fun HorizontalMockQuizScreen(
+fun HorizontalQuizScreen(
     question: GeneratedQuestion,
     questionNumber: Int,
     totalQuestions: Int,
@@ -301,7 +302,7 @@ private fun AnswerOption(
 // Previews
 @Preview(showBackground = true)
 @Composable
-fun VerticalMockQuizPreview() {
+fun VerticalQuizPreview() {
     TheQuizzlerTheme {
         val sampleQuestion = GeneratedQuestion(
             questionText = "What is the capital of France?",
@@ -310,7 +311,7 @@ fun VerticalMockQuizPreview() {
             checkAnswer = {it == "Paris"},
             timeLimitSeconds = 15
         )
-        VerticalMockQuizScreen(
+        VerticalQuizScreen(
             question = sampleQuestion,
             questionNumber = 1,
             totalQuestions = 10,
@@ -323,7 +324,7 @@ fun VerticalMockQuizPreview() {
 
 @Preview(showBackground = true, widthDp = 800, heightDp = 480)
 @Composable
-fun HorizontalMockQuizPreview() {
+fun HorizontalQuizPreview() {
     TheQuizzlerTheme {
         val sampleQuestion = GeneratedQuestion(
             questionText = "Which planet is known as the Red Planet?",
@@ -332,7 +333,7 @@ fun HorizontalMockQuizPreview() {
             checkAnswer = {it == "Mars"},
             timeLimitSeconds = 15
         )
-        HorizontalMockQuizScreen(
+        HorizontalQuizScreen(
             question = sampleQuestion,
             questionNumber = 2,
             totalQuestions = 10,

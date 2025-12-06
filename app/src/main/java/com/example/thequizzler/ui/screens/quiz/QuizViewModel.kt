@@ -26,7 +26,7 @@ data class QuizUiState(
     val generationFailed: Boolean = false
 )
 
-class QuizViewModel(
+open class QuizViewModel(
     private val sessionsRepository: SessionsRepository,
     private val questionInstancesRepository: QuestionInstancesRepository,
     private val highScoresRepository: HighScoresRepository,
@@ -109,5 +109,9 @@ class QuizViewModel(
 
             highScoresRepository.submitNewHighScore(sessionToSave.copy(id = newSessionId.toInt()))
         }
+    }
+
+    fun setUiStateForTests(testState: QuizUiState) {
+        _uiState.value = testState
     }
 }

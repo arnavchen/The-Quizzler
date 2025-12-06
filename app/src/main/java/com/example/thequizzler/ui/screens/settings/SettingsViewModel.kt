@@ -21,11 +21,8 @@ interface SettingsUiModel {
     fun setMeasurementSystem(system: String)
 }
 
-// The ViewModel takes the repository as a constructor parameter (Dependency Injection)
 class SettingsViewModel(private val settingsRepository: SettingsRepository) : ViewModel(), SettingsUiModel {
 
-    // 1. READ the settings from the repository and expose them as StateFlows
-    // The UI will "collect" these flows to get the current state.
     override val isLocationEnabled: StateFlow<Boolean> = settingsRepository.isLocationEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 

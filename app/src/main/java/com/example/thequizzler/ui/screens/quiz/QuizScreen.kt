@@ -16,6 +16,11 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -117,19 +122,39 @@ fun VerticalQuizScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Score: $score", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Score: $score",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics {
+                    contentDescription = "Current score is $score points"
+                    liveRegion = LiveRegionMode.Polite
+                }
+            )
             Text(
                 text = "${timeLeftSeconds}s",
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.semantics {
+                    liveRegion = LiveRegionMode.Assertive
+                }
             )
-            Text("Q$questionNumber/$totalQuestions", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Q$questionNumber/$totalQuestions",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics {
+                    contentDescription = "Question $questionNumber of $totalQuestions"
+                }
+            )
         }
 
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = AppSpacing.medium),
+                .padding(vertical = AppSpacing.medium)
+                .semantics {
+                    contentDescription = "Question: ${question.questionText}"
+                },
             tonalElevation = 2.dp,
         ) {
             Text(
@@ -213,14 +238,31 @@ fun HorizontalQuizScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Score: $score", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text(
+                    "Score: $score",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    modifier = Modifier.semantics {
+                        contentDescription = "Current score is $score points"
+                        liveRegion = LiveRegionMode.Polite
+                    }
+                )
                 Text(
                     text = "${timeLeftSeconds}s",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.semantics {
+                        liveRegion = LiveRegionMode.Assertive
+                    }
                 )
-                Text("Q$questionNumber/$totalQuestions", color = MaterialTheme.colorScheme.primary)
+                Text(
+                    "Q$questionNumber/$totalQuestions",
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.semantics {
+                        contentDescription = "Question $questionNumber of $totalQuestions"
+                    }
+                )
             }
             Spacer(Modifier.height(24.dp))
             Column(
@@ -283,12 +325,22 @@ private fun AnswerOption(
     val scaleTarget = if (isSelected && isCorrect) 1.03f else 1f
     val scale by animateFloatAsState(targetValue = scaleTarget, animationSpec = tween(250))
 
+    val stateDesc = when {
+        !isSelected -> "Not selected"
+        isCorrect -> "Correct answer"
+        else -> "Incorrect answer"
+    }
+
     ElevatedButton(
         onClick = { onClick(answerText) },
         enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
-            .scale(scale),
+            .scale(scale)
+            .semantics {
+                contentDescription = "Answer option: $answerText"
+                stateDescription = stateDesc
+            },
         colors = ButtonDefaults.elevatedButtonColors(
             containerColor = bgColor,
             contentColor = MaterialTheme.colorScheme.onPrimary

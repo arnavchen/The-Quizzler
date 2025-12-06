@@ -3,6 +3,10 @@ package com.example.thequizzler.ui.screens.settings
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -62,7 +66,9 @@ fun SettingsLayout(settingsUiModel: SettingsUiModel, isLandscape: Boolean) {
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 28.dp)
+            modifier = Modifier
+                .padding(bottom = 28.dp)
+                .semantics { heading() }
         )
 
         SettingsOptions(settingsUiModel)
@@ -110,7 +116,10 @@ fun MeasurementSystemCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = "Measurement System setting. Currently ${if (selectedSystem == "Imp") "Imperial" else "Metric"}"
+            },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
@@ -127,7 +136,7 @@ fun MeasurementSystemCard(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Straighten,
-                    contentDescription = "Measurement System",
+                    contentDescription = null, // Card provides context
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -169,7 +178,11 @@ fun SettingToggleCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = "$title setting"
+                stateDescription = if (checked) "Enabled" else "Disabled"
+            },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
@@ -188,7 +201,7 @@ fun SettingToggleCard(
             ) {
                 Icon(
                     imageVector = icon,
-                    contentDescription = title,
+                    contentDescription = null, // Card provides context
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -199,7 +212,13 @@ fun SettingToggleCard(
                     modifier = Modifier.padding(start = 12.dp)
                 )
             }
-            Switch(checked = checked, onCheckedChange = onCheckedChange)
+            Switch(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                modifier = Modifier.semantics {
+                    contentDescription = "Toggle $title"
+                }
+            )
         }
     }
 }
@@ -218,6 +237,10 @@ fun MeasurementSystemButton(text: String, selected: Boolean, onClick: () -> Unit
         modifier = Modifier
             .defaultMinSize(minWidth = 100.dp)
             .padding(4.dp)
+            .semantics {
+                contentDescription = "$text measurement system"
+                stateDescription = if (selected) "Selected" else "Not selected"
+            }
     ) {
         Text(
             text = text,

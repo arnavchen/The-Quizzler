@@ -2,8 +2,17 @@ package com.example.thequizzler.ui.screens.quiz
 
 import android.content.res.Configuration
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,7 +22,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -70,27 +85,83 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Trophy emoji or celebration
         Text(
-            text = finalScore.toString(),
-            style = MaterialTheme.typography.displayLarge.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 64.sp
+            text = "🏆",
+            style = MaterialTheme.typography.displayLarge.copy(fontSize = 80.sp),
+            modifier = Modifier.semantics {
+                contentDescription = "Trophy"
+            },
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Score card with elevation
+        Card(
+            modifier = Modifier
+                .shadow(8.dp, shape = MaterialTheme.shapes.large)
+                .semantics {
+                    contentDescription = "Your final score is $finalScore points"
+                },
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Your Score",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    ),
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = finalScore.toString(),
+                    style = MaterialTheme.typography.displayLarge.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 72.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    ),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Congratulations!",
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold
             ),
+            modifier = Modifier.semantics { heading() },
             textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Great Job!!!",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Medium),
+            text = "You really nailed this quiz!",
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            ),
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+
+        Spacer(modifier = Modifier.height(40.dp))
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
@@ -100,10 +171,30 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
                     }
                     launchSingleTop = true
                 } },
-                modifier = Modifier.size(width = 120.dp, height = 80.dp)
+                modifier = Modifier
+                    .weight(1f)
+                    .height(72.dp)
+                    .semantics {
+                        contentDescription = "Go to home screen"
+                    },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Home")
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Home,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Home",
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
 
@@ -114,10 +205,30 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
                     }
                     launchSingleTop = true
                 } },
-                modifier = Modifier.size(width = 120.dp, height = 80.dp)
+                modifier = Modifier
+                    .weight(1f)
+                    .height(72.dp)
+                    .semantics {
+                        contentDescription = "View leaderboard"
+                    },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary
+                )
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Leaderboard")
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Leaderboard,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Leaderboard",
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
         }
@@ -138,26 +249,82 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            // Trophy emoji
             Text(
-                text = finalScore.toString(),
-                style = MaterialTheme.typography.displayLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 64.sp
+                text = "🏆",
+                style = MaterialTheme.typography.displayLarge.copy(fontSize = 64.sp),
+                modifier = Modifier.semantics {
+                    contentDescription = "Trophy"
+                },
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Score card
+            Card(
+                modifier = Modifier
+                    .shadow(8.dp, shape = MaterialTheme.shapes.large)
+                    .semantics {
+                        contentDescription = "Your final score is $finalScore points"
+                    },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Your Score",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        ),
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = finalScore.toString(),
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 64.sp,
+                            color = MaterialTheme.colorScheme.primary
+                        ),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Fantastic Work!",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                modifier = Modifier.semantics { heading() },
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = "Your performance was outstanding.",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 ),
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Great Job!!!",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Medium),
-                textAlign = TextAlign.Center
-            )
         }
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(
@@ -167,10 +334,30 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
                     }
                     launchSingleTop = true
                 } },
-                modifier = Modifier.size(width = 120.dp, height = 80.dp)
+                modifier = Modifier
+                    .width(140.dp)
+                    .height(72.dp)
+                    .semantics {
+                        contentDescription = "Go to home screen"
+                    },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Home")
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Home,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Home",
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
 
@@ -181,11 +368,30 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
                     }
                     launchSingleTop = true
                 } },
-                modifier = Modifier.size(width = 120.dp, height = 80.dp)
+                modifier = Modifier
+                    .width(140.dp)
+                    .height(72.dp)
+                    .semantics {
+                        contentDescription = "View leaderboard"
+                    },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary
+                )
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-                    Text("Leaderboard")
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Leaderboard,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Leaderboard",
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
         }

@@ -22,6 +22,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -127,10 +130,13 @@ private fun SessionHeader(
             modifier = Modifier
                 .size(44.dp)
                 .align(Alignment.Start)
+                .semantics {
+                    contentDescription = "Back to sessions list"
+                }
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back",
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )
@@ -152,7 +158,10 @@ private fun SessionHeader(
                     session.userName,
                     fontWeight = FontWeight.Bold,
                     fontSize = 24.sp,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.semantics {
+                        heading()
+                    }
                 )
                 Text(
                     SimpleDateFormat("M/d/yyyy, h:mm a", Locale.getDefault()).format(Date(session.startTime)),
@@ -164,7 +173,10 @@ private fun SessionHeader(
             // Score display
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.semantics(mergeDescendants = true) {
+                    contentDescription = "Total score: ${session.score} points"
+                }
             ) {
                 Text(
                     "${session.score}",
@@ -197,11 +209,15 @@ fun QuestionCard(
     modifier: Modifier = Modifier
 ) {
     val isCorrect = question.userResponse.equals(question.correctResponse, ignoreCase = true)
+    val resultText = if (isCorrect) "Correct" else "Incorrect"
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .semantics(mergeDescendants = true) {
+                contentDescription = "$resultText. Question: ${question.question}. Your answer: ${question.userResponse}. Correct answer: ${question.correctResponse}"
+            },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(

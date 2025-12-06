@@ -26,6 +26,9 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -86,6 +89,9 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
         Text(
             text = "🏆",
             style = MaterialTheme.typography.displayLarge.copy(fontSize = 80.sp),
+            modifier = Modifier.semantics {
+                contentDescription = "Trophy"
+            },
             textAlign = TextAlign.Center
         )
 
@@ -94,7 +100,10 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
         // Score card with elevation
         Card(
             modifier = Modifier
-                .shadow(8.dp, shape = MaterialTheme.shapes.large),
+                .shadow(8.dp, shape = MaterialTheme.shapes.large)
+                .semantics {
+                    contentDescription = "Your final score is $finalScore points"
+                },
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             )
@@ -133,6 +142,7 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontWeight = FontWeight.Bold
             ),
+            modifier = Modifier.semantics { heading() },
             textAlign = TextAlign.Center
         )
 
@@ -163,7 +173,10 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
                 } },
                 modifier = Modifier
                     .weight(1f)
-                    .height(72.dp),
+                    .height(72.dp)
+                    .semantics {
+                        contentDescription = "Go to home screen"
+                    },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondary
                 )
@@ -174,7 +187,7 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Home,
-                        contentDescription = "Home",
+                        contentDescription = null,
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
@@ -194,7 +207,10 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
                 } },
                 modifier = Modifier
                     .weight(1f)
-                    .height(72.dp),
+                    .height(72.dp)
+                    .semantics {
+                        contentDescription = "View leaderboard"
+                    },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.tertiary
                 )
@@ -205,7 +221,7 @@ fun VerticalResultsScreen(navController: NavController, finalScore: Int) {
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Leaderboard,
-                        contentDescription = "Leaderboard",
+                        contentDescription = null,
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
@@ -237,6 +253,9 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
             Text(
                 text = "🏆",
                 style = MaterialTheme.typography.displayLarge.copy(fontSize = 64.sp),
+                modifier = Modifier.semantics {
+                    contentDescription = "Trophy"
+                },
                 textAlign = TextAlign.Center
             )
 
@@ -245,7 +264,10 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
             // Score card
             Card(
                 modifier = Modifier
-                    .shadow(8.dp, shape = MaterialTheme.shapes.large),
+                    .shadow(8.dp, shape = MaterialTheme.shapes.large)
+                    .semantics {
+                        contentDescription = "Your final score is $finalScore points"
+                    },
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
@@ -284,6 +306,7 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold
                 ),
+                modifier = Modifier.semantics { heading() },
                 textAlign = TextAlign.Center
             )
 
@@ -313,7 +336,10 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
                 } },
                 modifier = Modifier
                     .width(140.dp)
-                    .height(72.dp),
+                    .height(72.dp)
+                    .semantics {
+                        contentDescription = "Go to home screen"
+                    },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondary
                 )
@@ -324,7 +350,7 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Home,
-                        contentDescription = "Home",
+                        contentDescription = null,
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
@@ -344,7 +370,10 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
                 } },
                 modifier = Modifier
                     .width(140.dp)
-                    .height(72.dp),
+                    .height(72.dp)
+                    .semantics {
+                        contentDescription = "View leaderboard"
+                    },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.tertiary
                 )
@@ -355,7 +384,7 @@ fun HorizontalResultsScreen(navController: NavController, finalScore: Int) {
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Leaderboard,
-                        contentDescription = "Leaderboard",
+                        contentDescription = null,
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(modifier = Modifier.height(4.dp))

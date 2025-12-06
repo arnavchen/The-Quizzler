@@ -17,6 +17,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -102,7 +105,12 @@ fun VerticalLeaderboardScreen(leaderboard: List<PlayerScore> = listOf(
                 fontWeight = FontWeight.ExtraBold,
                 color = MaterialTheme.colorScheme.primary
             ),
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier
+                .padding(bottom = 24.dp)
+                .semantics {
+                    heading()
+                    contentDescription = "Leaderboard. Top scores for all players"
+                }
         )
 
         if (leaderboard.isEmpty()) {
@@ -110,7 +118,10 @@ fun VerticalLeaderboardScreen(leaderboard: List<PlayerScore> = listOf(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(32.dp),
+                    .padding(32.dp)
+                    .semantics(mergeDescendants = true) {
+                        contentDescription = "No scores yet. Play a quiz to get on the leaderboard"
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -194,7 +205,12 @@ fun HorizontalLeaderboardScreen(leaderboard: List<PlayerScore> = listOf(
                 fontWeight = FontWeight.ExtraBold,
                 color = MaterialTheme.colorScheme.primary
             ),
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier
+                .padding(bottom = 16.dp)
+                .semantics {
+                    heading()
+                    contentDescription = "Leaderboard. Top scores for all players"
+                }
         )
 
         if (leaderboard.isEmpty()) {
@@ -202,7 +218,10 @@ fun HorizontalLeaderboardScreen(leaderboard: List<PlayerScore> = listOf(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(32.dp),
+                    .padding(32.dp)
+                    .semantics(mergeDescendants = true) {
+                        contentDescription = "No scores yet. Play a quiz to get on the leaderboard"
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -324,12 +343,22 @@ fun PodiumCard(player: PlayerScore, modifier: Modifier = Modifier, isFirst: Bool
         else -> Pair("", MaterialTheme.colorScheme.outline)
     }
 
+    val placeText = when (player.place) {
+        1 -> "First place"
+        2 -> "Second place"
+        3 -> "Third place"
+        else -> "Place ${player.place}"
+    }
+
     val cardHeight = if (isFirst) 200.dp else 170.dp
 
     Card(
         modifier = modifier
             .height(cardHeight)
-            .border(3.dp, borderColor, RoundedCornerShape(20.dp)),
+            .border(3.dp, borderColor, RoundedCornerShape(20.dp))
+            .semantics(mergeDescendants = true) {
+                contentDescription = "$placeText. ${player.name} with ${player.score} points"
+            },
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isFirst) 12.dp else 6.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -390,11 +419,21 @@ fun LeaderboardCard(player: PlayerScore, modifier: Modifier = Modifier) {
         else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
     }
 
+    val rankSuffix = when (player.place % 10) {
+        1 -> if (player.place == 11) "th" else "st"
+        2 -> if (player.place == 12) "th" else "nd"
+        3 -> if (player.place == 13) "th" else "rd"
+        else -> "th"
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
-            .border(2.dp, borderColor, RoundedCornerShape(16.dp)),
+            .border(2.dp, borderColor, RoundedCornerShape(16.dp))
+            .semantics(mergeDescendants = true) {
+                contentDescription = "${player.place}$rankSuffix place. ${player.name} with ${player.score} points"
+            },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(

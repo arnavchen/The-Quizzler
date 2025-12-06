@@ -10,6 +10,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -110,7 +113,15 @@ fun NameField(name: String, onNameChange: (String) -> Unit, modifier: Modifier =
         value = name,
         onValueChange = onNameChange,
         label = { Text("Enter your name") },
-        modifier = modifier.fillMaxWidth(0.8f),
+        modifier = modifier
+            .fillMaxWidth(0.8f)
+            .semantics {
+                contentDescription = if (name.isEmpty()) {
+                    "Name input field, empty. Enter your name to personalize the quiz"
+                } else {
+                    "Name input field. Current name: $name"
+                }
+            },
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -126,20 +137,28 @@ fun QuizzlerTitle() {
         fontSize = 48.sp,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
-        color = MaterialTheme.colorScheme.primary
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.semantics {
+            heading()
+        }
     )
 }
 
 @Composable
 fun PlayButton(navController: NavController, name: String, modifier: Modifier = Modifier) {
+    val playerName = name.ifEmpty { "Player" }
+
     Button(
         onClick = {
-            val player = URLEncoder.encode(name.ifEmpty { "Player" }, "UTF-8")
+            val player = URLEncoder.encode(playerName, "UTF-8")
             navController.navigate("quiz_flow/$player")
         },
         modifier = modifier
             .fillMaxWidth(0.6f)
-            .padding(horizontal = 32.dp),
+            .padding(horizontal = 32.dp)
+            .semantics {
+                contentDescription = "Start quiz as $playerName. Double tap to begin playing"
+            },
         colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
         shape = RoundedCornerShape(12.dp)
     ) {

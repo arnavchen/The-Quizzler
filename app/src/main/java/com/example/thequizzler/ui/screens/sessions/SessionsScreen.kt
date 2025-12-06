@@ -19,6 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -138,12 +141,17 @@ fun HorizontalSessionsScreen(navController: NavController, sessions: List<Sessio
 
 @Composable
 fun SessionCard(session: Session, navController: NavController, modifier: Modifier = Modifier) {
+    val dateStr = SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(Date(session.startTime))
+    val accuracy = (session.numCorrect.toFloat() / 10f * 100).toInt()
 
     Card(
         modifier = modifier
             .fillMaxWidth()
             .clickable {
                 navController.navigate("sessionInfo/${session.id}")
+            }
+            .semantics(mergeDescendants = true) {
+                contentDescription = "Session from $dateStr. Score ${session.score} points. ${session.numCorrect} correct out of 10. $accuracy percent accuracy. Tap to view details"
             },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -259,7 +267,10 @@ private fun EmptySessionsPlaceholder() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(32.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = "No sessions yet. Complete a quiz to see your session history"
+            },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

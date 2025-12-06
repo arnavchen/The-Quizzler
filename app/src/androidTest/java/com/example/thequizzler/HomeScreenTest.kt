@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.compose.rememberNavController
 import com.example.thequizzler.ui.screens.home.HomeScreen
@@ -47,6 +48,7 @@ class HomeScreenTest {
 
         // Get name field and then input a name
         val nameTextField = composeTestRule.onNodeWithText("Enter your name")
+        nameTextField.performTextClearance()
         nameTextField.performTextInput(playerName)
 
         // See if there is the entered name is on the screen

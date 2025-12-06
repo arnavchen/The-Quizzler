@@ -21,34 +21,51 @@ class QuizManagerTest {
     }
 
     @Test
-    fun `submitAnswer with correct answer increases score and index`() {
+    fun `submitAnswer with correct answer increases score`() {
         val quizManager = QuizManager(sampleQuestions)
         val wasCorrect = quizManager.submitAnswer("A", 2000L) // 2 seconds
 
         assertTrue(wasCorrect)
-        assertEquals(1, quizManager.currentQuestionIndex)
+
+        assertEquals(0, quizManager.currentQuestionIndex)
         assertTrue("Score should be greater than 0 for a correct answer", quizManager.score > 0)
     }
 
     @Test
-    fun `submitAnswer with incorrect answer advances index without score`() {
+    fun `submitAnswer with incorrect answer does not increase score`() {
         val quizManager = QuizManager(sampleQuestions)
         val wasCorrect = quizManager.submitAnswer("B", 2000L)
 
         assertFalse(wasCorrect)
-        assertEquals(1, quizManager.currentQuestionIndex)
+
+        assertEquals(0, quizManager.currentQuestionIndex)
         assertEquals(0, quizManager.score)
     }
 
     @Test
-    fun `isFinished becomes true after last question`() {
+    fun `advanceToNextQuestion increments question index`() {
+        val quizManager = QuizManager(sampleQuestions)
+        assertEquals(0, quizManager.currentQuestionIndex)
+
+        quizManager.advanceToNextQuestion()
+
+        assertEquals(1, quizManager.currentQuestionIndex)
+        assertFalse("Quiz should not be finished after one advancement", quizManager.isFinished)
+    }
+
+    @Test
+    fun `isFinished becomes true after advancing past the last question`() {
         val quizManager = QuizManager(sampleQuestions)
 
         quizManager.submitAnswer("A", 1000L)
-        assertFalse(quizManager.isFinished)
+        quizManager.advanceToNextQuestion()
+        assertFalse("Quiz should not be finished on the second question", quizManager.isFinished)
+        assertEquals(1, quizManager.currentQuestionIndex)
 
         quizManager.submitAnswer("D", 1000L)
-        assertTrue(quizManager.isFinished)
+        quizManager.advanceToNextQuestion()
+        assertTrue("Quiz should be finished after advancing past the last question", quizManager.isFinished)
+        assertEquals(2, quizManager.currentQuestionIndex)
     }
 
     @Test

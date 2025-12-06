@@ -25,6 +25,9 @@
       <SelectionState runConfigName="LeaderboardScreenTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="remainingPlayers_areDisplayedInList()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>

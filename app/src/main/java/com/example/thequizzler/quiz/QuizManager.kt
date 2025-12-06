@@ -61,9 +61,13 @@ class QuizManager(private val generatedQuestions: List<GeneratedQuestion>) {
             )
         )
 
-        // Move to the next question
-        currentQuestionIndex++
         return wasCorrect
+    }
+
+    fun advanceToNextQuestion() {
+        if (!isFinished) {
+            currentQuestionIndex++
+        }
     }
 
     /**

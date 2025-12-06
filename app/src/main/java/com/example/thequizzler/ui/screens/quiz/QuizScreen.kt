@@ -2,38 +2,37 @@ package com.example.thequizzler.ui.screens.quiz
 
 import android.content.res.Configuration
 import android.util.Log
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import kotlinx.coroutines.delay
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.thequizzler.quiz.GeneratedQuestion
 import com.example.thequizzler.navigation.Screen
-import com.example.thequizzler.ui.theme.TheQuizzlerTheme
+import com.example.thequizzler.quiz.GeneratedQuestion
 import com.example.thequizzler.ui.theme.AppSpacing
+import com.example.thequizzler.ui.theme.TheQuizzlerTheme
+import kotlinx.coroutines.delay
 
 @Composable
 fun QuizScreen(navController: NavController, quizViewModel: QuizViewModel) {
@@ -50,6 +49,7 @@ fun QuizScreen(navController: NavController, quizViewModel: QuizViewModel) {
 
     val uiState by quizViewModel.uiState.collectAsState()
     val quizManager = uiState.quizManager
+    val isAnswerRevealed = uiState.isAnswerRevealed
 
     if (quizManager != null && !quizManager.isFinished) {
         val currentQuestion = quizManager.currentQuestion!!
@@ -57,25 +57,36 @@ fun QuizScreen(navController: NavController, quizViewModel: QuizViewModel) {
         val startTime by remember(quizManager.currentQuestionIndex) { mutableStateOf(System.currentTimeMillis()) }
 
         val onAnswerSelected: (String) -> Unit = { userAnswer ->
-            val timeTaken = System.currentTimeMillis() - startTime
-            quizManager.submitAnswer(userAnswer, timeTaken)
-            if (quizManager.isFinished) {
-                navController.navigate(Screen.Results.route)
+            if(!isAnswerRevealed) {
+                val timeTaken = System.currentTimeMillis() - startTime
+                quizViewModel.submitAnswer(userAnswer, timeTaken);
             }
         }
 
-        LaunchedEffect(quizManager.currentQuestionIndex) {
-            timeLeftMs = currentQuestion.timeLimitSeconds * 1000L
-            val questionStartTime = System.currentTimeMillis()
-            while (true) {
-                val elapsed = System.currentTimeMillis() - questionStartTime
-                val remaining = (currentQuestion.timeLimitSeconds * 1000L) - elapsed
-                timeLeftMs = if (remaining > 0) remaining else 0L
-                if (timeLeftMs <= 0L) {
-                    onAnswerSelected("")
-                    break
+        val onNextClicked = {
+            quizViewModel.nextQuestion()
+            // Check if the quiz is finished after advancing question
+            if (quizManager.isFinished) {
+                navController.navigate(Screen.Results.route) {
+                    popUpTo(Screen.MockQuiz.route) { inclusive = true }
                 }
-                delay(50L)
+            }
+        }
+
+        LaunchedEffect(quizManager.currentQuestionIndex, isAnswerRevealed) {
+            if(!isAnswerRevealed) {
+                timeLeftMs = currentQuestion.timeLimitSeconds * 1000L
+                val questionStartTime = System.currentTimeMillis()
+                while (true) {
+                    val elapsed = System.currentTimeMillis() - questionStartTime
+                    val remaining = (currentQuestion.timeLimitSeconds * 1000L) - elapsed
+                    timeLeftMs = if (remaining > 0) remaining else 0L
+                    if (timeLeftMs <= 0L) {
+                        quizViewModel.submitAnswer("", elapsed)
+                        break
+                    }
+                    delay(50L)
+                }
             }
         }
 
@@ -86,7 +97,9 @@ fun QuizScreen(navController: NavController, quizViewModel: QuizViewModel) {
                 totalQuestions = quizManager.totalQuestions,
                 score = quizManager.score,
                 timeLeftSeconds = (timeLeftMs / 1000L).toInt(),
-                onAnswer = onAnswerSelected
+                onAnswer = onAnswerSelected,
+                isAnswerRevealed = isAnswerRevealed,
+                onNext = onNextClicked
             )
         } else {
             VerticalQuizScreen(
@@ -95,7 +108,9 @@ fun QuizScreen(navController: NavController, quizViewModel: QuizViewModel) {
                 totalQuestions = quizManager.totalQuestions,
                 score = quizManager.score,
                 timeLeftSeconds = (timeLeftMs / 1000L).toInt(),
-                onAnswer = onAnswerSelected
+                onAnswer = onAnswerSelected,
+                isAnswerRevealed = isAnswerRevealed,
+                onNext = onNextClicked
             )
         }
     }
@@ -108,7 +123,9 @@ fun VerticalQuizScreen(
     totalQuestions: Int,
     score: Int,
     timeLeftSeconds: Int,
-    onAnswer: (String) -> Unit
+    onAnswer: (String) -> Unit,
+    isAnswerRevealed: Boolean,
+    onNext: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -169,31 +186,33 @@ fun VerticalQuizScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             var selectedAnswer by remember(question) { mutableStateOf<String?>(null) }
-            var selectedIsCorrect by remember(question) { mutableStateOf<Boolean?>(null) }
+
+            LaunchedEffect(selectedAnswer) {
+                if (selectedAnswer != null) {
+                    onAnswer(selectedAnswer!!)
+                }
+            }
 
             question.answers.forEach { answerText ->
-                val isSelected = selectedAnswer != null && selectedAnswer == answerText
-                val isCorrect = isSelected && (selectedIsCorrect == true)
-
                 AnswerOption(
                     answerText = answerText,
-                    isSelected = isSelected,
-                    isCorrect = isCorrect,
+                    isSelected = selectedAnswer == answerText,
+                    isCorrect = isAnswerRevealed && question.checkAnswer(answerText),
+                    isActuallyCorrect = question.correctAnswer == answerText,
+                    isRevealed = isAnswerRevealed,
                     onClick = { chosen ->
                         if (selectedAnswer == null) {
                             selectedAnswer = chosen
-                            selectedIsCorrect = question.checkAnswer(chosen)
                         }
                     },
-                    enabled = selectedAnswer == null
+                    enabled = !isAnswerRevealed
                 )
             }
 
-            // when an answer is selected, submit after a short delay to allow animation
-            LaunchedEffect(selectedAnswer) {
-                if (selectedAnswer != null) {
-                    delay(600L)
-                    onAnswer(selectedAnswer!!)
+            if (isAnswerRevealed) {
+                Spacer(Modifier.height(AppSpacing.medium))
+                Button(onClick = onNext, modifier = Modifier.fillMaxWidth()) {
+                    Text("Next")
                 }
             }
         }
@@ -207,7 +226,9 @@ fun HorizontalQuizScreen(
     totalQuestions: Int,
     score: Int,
     timeLeftSeconds: Int,
-    onAnswer: (String) -> Unit
+    onAnswer: (String) -> Unit,
+    isAnswerRevealed: Boolean,
+    onNext: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -270,36 +291,39 @@ fun HorizontalQuizScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 var selectedAnswer by remember { mutableStateOf<String?>(null) }
-                var selectedIsCorrect by remember { mutableStateOf<Boolean?>(null) }
-
-                question.answers.forEach { answerText ->
-                    val isSelected = selectedAnswer != null && selectedAnswer == answerText
-                    val isCorrect = isSelected && (selectedIsCorrect == true)
-
-                    AnswerOption(
-                        answerText = answerText,
-                        isSelected = isSelected,
-                        isCorrect = isCorrect,
-                        onClick = { chosen ->
-                            if (selectedAnswer == null) {
-                                selectedAnswer = chosen
-                                selectedIsCorrect = question.checkAnswer(chosen)
-                            }
-                        },
-                        enabled = selectedAnswer == null
-                    )
-                }
 
                 LaunchedEffect(selectedAnswer) {
                     if (selectedAnswer != null) {
-                        delay(600L)
                         onAnswer(selectedAnswer!!)
+                    }
+                }
+
+                question.answers.forEach { answerText ->
+                    AnswerOption(
+
+                        answerText = answerText,
+                        isSelected = selectedAnswer == answerText,
+                        isCorrect = isAnswerRevealed && question.checkAnswer(answerText),
+                        isActuallyCorrect = question.correctAnswer == answerText,
+                        isRevealed = isAnswerRevealed,
+                        onClick = { chosen ->
+                            if (selectedAnswer == null) {
+                                selectedAnswer = chosen
+                            }
+                        },
+                        enabled = !isAnswerRevealed
+                    )
+                }
+
+                if (isAnswerRevealed) {
+                    Spacer(Modifier.height(AppSpacing.medium))
+                    Button(onClick = onNext, modifier = Modifier.fillMaxWidth()) {
+                        Text("Next")
                     }
                 }
             }
         }
     }
-
 }
 
 
@@ -308,6 +332,8 @@ private fun AnswerOption(
     answerText: String,
     isSelected: Boolean,
     isCorrect: Boolean,
+    isActuallyCorrect: Boolean, // New parameter
+    isRevealed: Boolean,
     onClick: (String) -> Unit,
     enabled: Boolean = true
 ) {
@@ -316,9 +342,10 @@ private fun AnswerOption(
     val defaultColor = MaterialTheme.colorScheme.primary
 
     val targetColor = when {
-        !isSelected -> defaultColor
-        isCorrect -> successColor
-        else -> wrongColor
+        !isRevealed -> defaultColor
+        isSelected && !isCorrect -> wrongColor
+        isActuallyCorrect -> successColor
+        else -> defaultColor.copy(alpha = 0.6f)
     }
 
     val bgColor by animateColorAsState(targetColor, animationSpec = tween(durationMillis = 300))
@@ -326,9 +353,11 @@ private fun AnswerOption(
     val scale by animateFloatAsState(targetValue = scaleTarget, animationSpec = tween(250))
 
     val stateDesc = when {
-        !isSelected -> "Not selected"
-        isCorrect -> "Correct answer"
-        else -> "Incorrect answer"
+        !isRevealed -> "Not selected"
+        isSelected && isCorrect -> "Correct answer"
+        isSelected && !isCorrect -> "Incorrect answer"
+        !isSelected && isActuallyCorrect -> "The correct answer"
+        else -> "Not selected"
     }
 
     ElevatedButton(
@@ -343,7 +372,9 @@ private fun AnswerOption(
             },
         colors = ButtonDefaults.elevatedButtonColors(
             containerColor = bgColor,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            disabledContainerColor = bgColor,
+            disabledContentColor = MaterialTheme.colorScheme.onPrimary
         )
     ) {
         Text(answerText, style = MaterialTheme.typography.bodyLarge)
@@ -369,7 +400,9 @@ fun VerticalQuizPreview() {
             totalQuestions = 10,
             score = 50,
             timeLeftSeconds = 10,
-            onAnswer = {}
+            onAnswer = {},
+            isAnswerRevealed = false,
+            onNext = {}
         )
     }
 }
@@ -391,7 +424,9 @@ fun HorizontalQuizPreview() {
             totalQuestions = 10,
             score = 70,
             timeLeftSeconds = 10,
-            onAnswer = {}
+            onAnswer = {},
+            isAnswerRevealed = false,
+            onNext = {}
         )
     }
 }

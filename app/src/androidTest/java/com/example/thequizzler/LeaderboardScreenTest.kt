@@ -19,17 +19,17 @@ class LeaderboardScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    // A fake list of scores to use in our tests.
+    // A fake list of scores to use for tests.
     private val fakeLeaderboardData = listOf(
         PlayerScore("Alice", 980, 1),
         PlayerScore("Bob", 850, 2),
-        PlayerScore("Charlie", 720, 3)
+        PlayerScore("Charlie", 720, 3),
+        PlayerScore("David", 650, 4)
     )
 
     @Test
     fun leaderboardTitle_isDisplayed() {
-        // Set the content to be the VerticalLeaderboardScreen with an empty list.
-        // This completely bypasses the main LeaderboardScreen and its broken ViewModel factory.
+        // Create a vertical leaderboard with the fake list
         composeTestRule.setContent {
             TheQuizzlerTheme {
                 VerticalLeaderboardScreen(leaderboard = emptyList())
@@ -41,20 +41,65 @@ class LeaderboardScreenTest {
     }
 
     @Test
-    fun playerScores_areDisplayedCorrectly_inList() {
-        // Set the content with our fake data
+    fun emptyLeaderboard_showsPlaceholder() {
+        // Test an empty list
+        composeTestRule.setContent {
+            TheQuizzlerTheme {
+                VerticalLeaderboardScreen(leaderboard = emptyList())
+            }
+        }
+
+        // Verify the placeholder text is visible when the leaderboard is empty
+        composeTestRule.onNodeWithText("No scores yet!").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Play a quiz to get on the leaderboard").assertIsDisplayed()
+    }
+
+    @Test
+    fun podiumPlayers_areDisplayedCorrectly() {
+
         composeTestRule.setContent {
             TheQuizzlerTheme {
                 VerticalLeaderboardScreen(leaderboard = fakeLeaderboardData)
             }
         }
 
-        // Verify that the data for the first player is displayed
+        // Verify the top 3 players are displayed correctly
         composeTestRule.onNodeWithText("Alice").assertIsDisplayed()
-        composeTestRule.onNodeWithText("980 pts").assertIsDisplayed()
+        composeTestRule.onNodeWithText("980").assertIsDisplayed() // Score is now separate from "pts"
 
-        // Verify that the data for the second player is also displayed
         composeTestRule.onNodeWithText("Bob").assertIsDisplayed()
-        composeTestRule.onNodeWithText("850 pts").assertIsDisplayed()
+        composeTestRule.onNodeWithText("850").assertIsDisplayed()
+
+        composeTestRule.onNodeWithText("Charlie").assertIsDisplayed()
+        composeTestRule.onNodeWithText("720").assertIsDisplayed()
+    }
+
+    @Test
+    fun remainingPlayers_areDisplayedInList() {
+
+        composeTestRule.setContent {
+            TheQuizzlerTheme {
+                VerticalLeaderboardScreen(leaderboard = fakeLeaderboardData)
+            }
+        }
+
+        // Verify the 4th place player is correctly displayed
+        composeTestRule.onNodeWithText("David").assertIsDisplayed()
+
+        composeTestRule.onNodeWithText("650").assertIsDisplayed()
+    }
+
+    @Test
+    fun podiumPlayers_haveMedalEmojis() {
+        composeTestRule.setContent {
+            TheQuizzlerTheme {
+                VerticalLeaderboardScreen(leaderboard = fakeLeaderboardData)
+            }
+        }
+
+        // Check for the specific medal emojis which are now used in the podium
+        composeTestRule.onNodeWithText("🥇").assertIsDisplayed() // 1st place
+        composeTestRule.onNodeWithText("🥈").assertIsDisplayed() // 2nd place
+        composeTestRule.onNodeWithText("🥉").assertIsDisplayed() // 3rd place
     }
 }

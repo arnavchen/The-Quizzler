@@ -56,12 +56,6 @@ fun ResultsScreen(navController: NavController, quizViewModel: QuizViewModel) {
     val uiState by quizViewModel.uiState.collectAsState()
     val finalScore = uiState.quizManager?.score ?: 0
 
-    // This LaunchedEffect runs ONCE when the screen is first composed.
-    // It's the perfect place to trigger the save operation.
-    LaunchedEffect(Unit) {
-        quizViewModel.finalizeAndSaveQuiz()
-    }
-
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
 

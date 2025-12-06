@@ -23,7 +23,8 @@ data class QuizUiState(
     val quizManager: QuizManager? = null,
     val isLoading: Boolean = true,
     val playerName: String = "",
-    val generationFailed: Boolean = false
+    val generationFailed: Boolean = false,
+    val isAnswerRevealed: Boolean = false
 )
 
 open class QuizViewModel(
@@ -79,6 +80,23 @@ open class QuizViewModel(
             if (stored && location == null) {
                 settingsRepository.setLocationEnabled(false)
             }
+        }
+    }
+
+    fun submitAnswer(userAnswer: String, timeTakenMs: Long) {
+        val manager = _uiState.value.quizManager ?: return
+        manager.submitAnswer(userAnswer, timeTakenMs)
+        _uiState.value = _uiState.value.copy(isAnswerRevealed = true)
+    }
+
+    fun nextQuestion() {
+        val manager = _uiState.value.quizManager ?: return
+        manager.advanceToNextQuestion()
+        if (manager.isFinished) {
+            finalizeAndSaveQuiz()
+        } else {
+            // Reset revealed state for next question
+            _uiState.value = _uiState.value.copy(isAnswerRevealed = false)
         }
     }
 

@@ -46,7 +46,7 @@ class PlacesRepository(private val context: Context) {
 
     init {
         // Define a variable to hold the Places API key.
-        val apiKey = "AIzaSyCq65qDVQdpMelrUSg7enm1TGnRs3coPeQ"
+        val apiKey = "$ApiKey"
 
         // Initialize the SDK
         Places.initializeWithNewPlacesApiEnabled(context, apiKey)
